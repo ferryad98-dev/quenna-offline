@@ -1,10 +1,10 @@
 /* ============================================================
-   Service Worker — PISANG MADU QUEENA
+   Service Worker — KEDAI PISANG QUEENA
    Strategi: network-first dengan fallback cache (stale
    while offline). Setelah aplikasi dibuka sekali, tetap bisa
    dipakai saat internet mati (data terakhir di cache).
    ============================================================ */
-const CACHE = 'pisang-madu-queena-v37';
+const CACHE = 'pisang-madu-queena-v38';
 
 const ASSETS = [
   './',

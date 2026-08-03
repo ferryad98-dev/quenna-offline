@@ -1,5 +1,5 @@
 /* ============================================================
-   KONFIGURASI APLIKASI — PISANG MADU QUEENA
+   KONFIGURASI APLIKASI — KEDAI PISANG QUEENA
    ------------------------------------------------------------
    Setelah deploy Google Apps Script, isi GAS_URL dengan URL
    Web App Anda (lihat README.md langkah 1).
@@ -7,7 +7,7 @@
    menu Pengaturan → Koneksi Spreadsheet → Simpan.
    ============================================================ */
 var CONFIG = {
-  // URL Web App Google Apps Script (sudah terisi — backend PISANG MADU QUEENA)
+  // URL Web App Google Apps Script (sudah terisi — backend KEDAI PISANG QUEENA)
   GAS_URL: 'https://script.google.com/macros/s/AKfycby_6xj5BYYcvQoZ_9_lzwmVofcKtez3JsSkcoymE0ZPCCQGiScZH3a-vAq0UjK7fiXU-g/exec',
 
   // Token opsional untuk keamanan ringan (harus sama dengan

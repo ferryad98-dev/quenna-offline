@@ -1,5 +1,5 @@
 /* ============================================================
-   PISANG MADU QUEENA — Logika Utama Aplikasi Kasir
+   KEDAI PISANG QUEENA — Logika Utama Aplikasi Kasir
    v1.1: + kelola kategori, + foto menu asli (Drive / demo)
    ============================================================ */
 'use strict';
