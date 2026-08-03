@@ -12,6 +12,10 @@ Aplikasi kasir berbasis **mobile web (PWA)** untuk usaha jualan online **PISANG 
 - 📴 **Offline-ready** — transaksi tetap jalan saat internet mati, otomatis tersinkron saat online
 - 📲 **Bisa di-install** ke layar utama HP (seperti aplikasi native)
 
+
+> ⚙️ **Catatan teknis**: semua komunikasi aplikasi ↔ GAS memakai **GET (query string)**, bukan POST.
+> Google Apps Script sering me-redirect permintaan POST sehingga data bisa hilang (error 405); GET terbukti selalu aman. Pastikan `Code.gs` di Apps Script sudah versi terbaru yang mendukung parameter `payload`.
+
 ## Arsitektur
 
 ```

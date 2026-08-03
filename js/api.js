@@ -1,65 +1,26 @@
 /* ============================================================
    Lapisan API — komunikasi dengan Web App Google Apps Script
-   (database: Google Spreadsheet). Kirim JSON via POST
-   Content-Type text/plain agar tidak memicu CORS preflight.
+   (database: Google Spreadsheet).
+   ------------------------------------------------------------
+   PENTING: semua permintaan memakai GET (query string).
+   Alasan: Apps Script me-redirect POST → browser mengubah POST
+   jadi GET (data hilang → error 405). GET aman dari masalah ini
+   karena parameter ikut di URL.
    ============================================================ */
 const Api = {
-  /* Kirim POST, tangani redirect khas Apps Script:
-     Google kadang me-302 ke URL ber-token, dan browser mengubah
-     POST → GET saat redirect (data hilang). Solusi: jika fetch
-     melaporkan redirect, kirim ulang POST ke URL final. */
-  async post(url, body, ctrl) {
-    let res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body,
-      signal: ctrl.signal,
-      redirect: 'follow',
-    });
-    if (res.redirected && res.url && res.url !== url) {
-      res = await fetch(res.url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body,
-        signal: ctrl.signal,
-      });
-    }
-    return res;
-  },
-
-  /* Satu kali percobaan POST + parse JSON ke satu URL */
-  async tryOnce(url, body, timeout) {
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), timeout);
-    try {
-      const res = await this.post(url, body, ctrl);
-      let data;
-      try {
-        data = JSON.parse(await res.text());
-      } catch (e) {
-        throw new Error('Respons GAS tidak valid (HTTP ' + res.status + ')');
-      }
-      if (!data || data.ok !== true) {
-        throw new Error((data && data.error) || 'GAS mengembalikan error');
-      }
-      return data;
-    } finally {
-      clearTimeout(timer);
-    }
-  },
-
   async call(action, payload = {}, opts) {
     opts = opts || {};
-    const timeout = opts.timeout || 20000;
-    const retries = opts.retries !== undefined ? opts.retries : 0;
+    const timeout = opts.timeout || 25000;
+    const retries = opts.retries !== undefined ? opts.retries : 1;
 
     if (!CONFIG.GAS_URL || !String(CONFIG.GAS_URL).trim()) {
       throw new Error('URL GAS belum diisi (mode demo)');
     }
 
-    const body = JSON.stringify(
-      Object.assign({ action }, payload, { token: CONFIG.TOKEN })
-    );
+    // Susun query string: ?action=...&payload=<JSON>&token=...
+    const full = Object.assign({ action }, payload, { token: CONFIG.TOKEN });
+    const q = 'action=' + encodeURIComponent(action) +
+      '&payload=' + encodeURIComponent(JSON.stringify(full));
 
     // Daftar URL: URL aktif dulu, URL bawaan sebagai cadangan
     const urls = [CONFIG.GAS_URL];
@@ -68,32 +29,47 @@ const Api = {
     }
 
     let lastErr = null;
-    for (const url of urls) {
+    for (const base of urls) {
+      const url = base + (base.indexOf('?') >= 0 ? '&' : '?') + q;
       for (let attempt = 0; attempt <= retries; attempt++) {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), timeout);
         try {
-          return await this.tryOnce(url, body, timeout);
+          const res = await fetch(url, { method: 'GET', signal: ctrl.signal });
+          let data;
+          try {
+            data = JSON.parse(await res.text());
+          } catch (e) {
+            throw new Error('Respons GAS tidak valid (HTTP ' + res.status + ')');
+          }
+          if (!data || data.ok !== true) {
+            throw new Error((data && data.error) || 'GAS mengembalikan error');
+          }
+          return data;
         } catch (e) {
           lastErr = e;
-          await new Promise(r => setTimeout(r, 400 * (attempt + 1)));
+          await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
+        } finally {
+          clearTimeout(timer);
         }
       }
     }
     throw lastErr || new Error('Server tidak terjangkau. Cek koneksi internet / URL GAS.');
   },
 
-  /* Pembaca: fail cepat (GAS bisa cold start, biar retry di background) */
-  getMenu()           { return this.call('getMenu', {}, { timeout: 20000, retries: 0 }); },
-  getAll()            { return this.call('getAll', {}, { timeout: 20000, retries: 0 }); },
-  getCategories()     { return this.call('getCategories', {}, { timeout: 15000, retries: 0 }); },
-  getSettings()       { return this.call('getSettings', {}, { timeout: 15000, retries: 0 }); },
-  getSales(limit)     { return this.call('getSales', { limit: limit || 200 }, { timeout: 20000, retries: 0 }); },
+  /* ---- pembaca: toleransi lambat (GAS bisa cold start) ---- */
+  getMenu()           { return this.call('getMenu', {}, { timeout: 30000, retries: 1 }); },
+  getAll()            { return this.call('getAll', {}, { timeout: 30000, retries: 1 }); },
+  getCategories()     { return this.call('getCategories', {}, { timeout: 25000, retries: 1 }); },
+  getSettings()       { return this.call('getSettings', {}, { timeout: 25000, retries: 1 }); },
+  getSales(limit)     { return this.call('getSales', { limit: limit || 200 }, { timeout: 30000, retries: 1 }); },
 
-  /* Penulis: retry singkat biar transaksi tidak hilang, tetap cepat */
-  saveMenu(item)      { return this.call('saveMenu', { item }, { timeout: 20000, retries: 1 }); },
-  deleteMenu(id)      { return this.call('deleteMenu', { id }, { timeout: 20000, retries: 1 }); },
-  saveCategory(cat)   { return this.call('saveCategory', { category: cat }, { timeout: 20000, retries: 1 }); },
-  deleteCategory(id)  { return this.call('deleteCategory', { id }, { timeout: 20000, retries: 1 }); },
-  saveSettings(settings) { return this.call('saveSettings', { settings }, { timeout: 20000, retries: 1 }); },
-  saveSale(sale)      { return this.call('saveSale', { sale }, { timeout: 20000, retries: 1 }); },
-  setup(reset)        { return this.call('setup', { reset: reset === true }, { timeout: 60000, retries: 0 }); },
+  /* ---- penulis: retry agresif biar transaksi tidak hilang ---- */
+  saveMenu(item)      { return this.call('saveMenu', { item }, { timeout: 25000, retries: 2 }); },
+  deleteMenu(id)      { return this.call('deleteMenu', { id }, { timeout: 25000, retries: 2 }); },
+  saveCategory(cat)   { return this.call('saveCategory', { category: cat }, { timeout: 25000, retries: 2 }); },
+  deleteCategory(id)  { return this.call('deleteCategory', { id }, { timeout: 25000, retries: 2 }); },
+  saveSettings(settings) { return this.call('saveSettings', { settings }, { timeout: 25000, retries: 2 }); },
+  saveSale(sale)      { return this.call('saveSale', { sale }, { timeout: 25000, retries: 2 }); },
+  setup(reset)        { return this.call('setup', { reset: reset === true }, { timeout: 90000, retries: 0 }); },
 };

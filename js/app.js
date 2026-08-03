@@ -1267,7 +1267,7 @@ function bindEvents() {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
     try {
-      State.currentFoto = await fileToDataUrl(file, 400, 0.8);
+      State.currentFoto = await fileToDataUrl(file, 220, 0.65); // kecil: muat di query string GET
       renderFotoPreview();
       $('#mfFotoUrl').value = '';
     } catch (err) {

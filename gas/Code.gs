@@ -45,6 +45,11 @@ function route_(e) {
       catch (err) { return out_({ ok: false, error: 'JSON body tidak valid' }); }
     } else if (e.parameter) {
       body = e.parameter;
+      // Dukungan GET: payload dikirim sebagai parameter (query string)
+      if (body.payload) {
+        try { body = JSON.parse(body.payload); }
+        catch (err) { return out_({ ok: false, error: 'Payload tidak valid' }); }
+      }
     }
 
     const action = String(body.action || '');
