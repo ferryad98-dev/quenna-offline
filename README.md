@@ -16,6 +16,9 @@ Aplikasi kasir berbasis **mobile web (PWA)** untuk usaha jualan online **PISANG 
 > ⚙️ **Catatan teknis**: semua komunikasi aplikasi ↔ GAS memakai **GET (query string)**, bukan POST.
 > Google Apps Script sering me-redirect permintaan POST sehingga data bisa hilang (error 405); GET terbukti selalu aman. Pastikan `Code.gs` di Apps Script sudah versi terbaru yang mendukung parameter `payload`.
 
+
+> 🔧 **Fix penting (v1.6.1)**: `saveSale_` di `Code.gs` sebelumnya error *"Cannot access 'tanggal' before initialization"* karena urutan deklarasi — akibatnya transaksi tidak bisa masuk spreadsheet. Sudah diperbaiki: `tanggal`/`jam` dideklarasikan sebelum dipakai. **WAJIB redeploy Code.gs** (Deploy → Manage deployments → New version) setelah mengganti file.
+
 ## Arsitektur
 
 ```

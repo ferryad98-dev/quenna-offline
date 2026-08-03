@@ -330,14 +330,15 @@ function saveSale_(ss, sale) {
   const bayar = metode === 'Tunai' ? (Number(sale.bayar) || 0) : total;
   const kembali = metode === 'Tunai' ? Math.max(0, bayar - total) : 0;
 
+  // DEKLARASI DULU sebelum dipakai (hindari error TDZ)
+  const tz = Session.getScriptTimeZone();
+  const tanggal = String(sale.tanggal || Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd'));
+  const jam = String(sale.jam || Utilities.formatDate(new Date(), tz, 'HH:mm'));
+
   // Nomor urut transaksi PER HARI (reset tiap hari): 001, 002, dst.
   const dataRows = sh.getDataRange().getValues().slice(1);
   const todayCount = dataRows.filter(r => String(r[1]) === tanggal).length;
   const no = String(todayCount + 1).padStart(3, '0');
-
-  const tz = Session.getScriptTimeZone();
-  const tanggal = String(sale.tanggal || Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd'));
-  const jam = String(sale.jam || Utilities.formatDate(new Date(), tz, 'HH:mm'));
 
   sh.appendRow([
     no, tanggal, jam, JSON.stringify(items),

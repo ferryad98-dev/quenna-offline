@@ -527,9 +527,9 @@ async function doPay() {
   await renderReceiptPaper(res.sale);
   $('#printStatus').textContent = res.saved
     ? '✔ Tersimpan ke spreadsheet'
-    : '⚠ Server offline — struk disimpan lokal, akan disinkronkan nanti';
+    : '⚠ ' + (res.error || 'Server tidak terjangkau') + ' — struk disimpan lokal, akan disinkronkan otomatis';
   if (res.saved) toast('Pembayaran dicatat ✔', 'ok');
-  else toast('Server offline — transaksi masuk antrian', 'warn');
+  else toast('Disimpan lokal — ' + (res.error || 'server offline'), 'warn');
 
   loadSales();
   updatePendingBadge();
