@@ -77,6 +77,7 @@ function route_(e) {
       case 'saveSettings':   return out_(saveSettings_(ss, body.settings));
       case 'saveSale':       return out_(saveSale_(ss, body.sale));
       case 'getSales':       return out_({ ok: true, sales: readSales_(ss, Number(body.limit) || 100) });
+      case 'cleanSales':     return out_(cleanSales_(ss));
       default:               return out_({ ok: false, error: 'Action tidak dikenal: ' + action });
     }
   } catch (err) {
@@ -421,6 +422,49 @@ function readSales_(ss, limit) {
         id: r.length > 13 ? String(r[13] || '') : '',
       };
     });
+}
+
+
+/* ============ PEMBERSIH DUPLIKAT TRANSAKSI ============
+   Menghapus baris duplikat (transaksi sama tercatat berulang
+   akibat retry saat GAS lambat) lalu merapikan nomor urut.
+   Deteksi duplikat: tanggal + jam + items + total identik.
+   Baris pertama yang dipertahankan, sisanya dihapus. */
+function cleanSales_(ss) {
+  const sh = sheet_(ss, 'TRANSAKSI', [
+    'NO', 'TANGGAL', 'JAM', 'ITEMS', 'JUMLAH_ITEM',
+    'SUBTOTAL', 'DISKON', 'TOTAL', 'METODE', 'BAYAR', 'KEMBALI', 'KASIR', 'NAMA_PEMBELI', 'ID_TRANSAKSI',
+  ]);
+  const data = sh.getDataRange().getValues();
+  const tz = Session.getScriptTimeZone();
+  const fmtTgl = v => (v instanceof Date) ? Utilities.formatDate(v, tz, 'yyyy-MM-dd') : String(v || '').slice(0, 10);
+
+  const seen = {};
+  const keepIdx = [];
+  let removed = 0;
+  for (let i = 1; i < data.length; i++) {
+    const r = data[i];
+    if (!r[0] && !r[3]) continue; // baris kosong
+    const key = fmtTgl(r[1]) + '|' + String(r[2] || '') + '|' + String(r[3] || '') + '|' + String(r[7] || '');
+    if (seen[key]) { removed++; continue; }  // duplikat → hapus
+    seen[key] = true;
+    keepIdx.push(i);
+  }
+
+  if (removed > 0) {
+    // Tulis ulang: baris yang dipertahankan + renumber NO 1..N
+    const out = [data[0]];
+    keepIdx.forEach((idx, n) => {
+      const r = data[idx].slice();
+      r[0] = String(n + 1); // nomor baru 1,2,3...
+      out.push(r);
+    });
+    // Bersihkan sheet lalu tulis ulang
+    if (sh.getLastRow() > 0) sh.deleteRows(2, sh.getLastRow() - 1);
+    if (out.length > 1) sh.getRange(2, 1, out.length - 1, out[0].length).setValues(out.slice(1));
+  }
+
+  return { ok: true, removed: removed, remaining: keepIdx.length };
 }
 
 /* ============ SETUP AWAL (contoh menu 3 kategori) ============ */

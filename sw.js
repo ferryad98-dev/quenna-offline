@@ -4,7 +4,7 @@
    while offline). Setelah aplikasi dibuka sekali, tetap bisa
    dipakai saat internet mati (data terakhir di cache).
    ============================================================ */
-const CACHE = 'pisang-madu-queena-v44';
+const CACHE = 'pisang-madu-queena-v45';
 
 const ASSETS = [
   './',
