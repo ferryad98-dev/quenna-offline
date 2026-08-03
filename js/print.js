@@ -57,7 +57,11 @@ const Print = (() => {
     const center = (t, o) => add(t, Object.assign({ c: 'center' }, o));
     const kv = (k, v, o) => add(padLine(k, v, W), o);
 
-    add(truncate((st && st.namaToko) || CONFIG.APP_NAME, W), { c: 'center', b: true, d: true });
+    // Nama toko: BOLD biasa (TANPA double-height).
+    // Mode dblH sering menggandakan LEBAR huruf di banyak printer →
+    // nama panjang ("Kedai Pisang Queena") bisa patah jadi 2 baris.
+    // Dengan bold normal, nama selalu muat 1 baris rapi di semua printer.
+    add(truncate((st && st.namaToko) || CONFIG.APP_NAME, W), { c: 'center', b: true });
     if (st && st.alamat) center(truncate(st.alamat, W));
     if (st && st.telepon) center(truncate('Telp. ' + st.telepon, W));
     add(sep);
