@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+  <title>PISANG MADU QUEENA — Kasir</title>
+  <meta name="theme-color" content="#F59E0B">
+  <meta name="description" content="Aplikasi kasir online & cetak struk bluetooth PISANG MADU QUEENA">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Pisang Madu">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ===== HEADER ===== -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-logo" id="brandLogo"><img src="icons/icon-192.png" alt="logo PISANG MADU QUEENA"></div>
+      <div class="brand-text">
+        <h1 id="brandTitle">PISANG MADU QUEENA</h1>
+        <span>Kasir · Struk Bluetooth · Spreadsheet</span>
+      </div>
+    </div>
+    <button class="status-pill" id="gasDotWrap" title="Status koneksi">
+      <span id="gasDot" class="dot"></span>
+    </button>
+  </header>
+
+  <div id="demoBanner" class="demo-banner hidden">
+    ⚠️ <b>Mode Demo</b> — data hanya di perangkat ini. Isi URL Google Apps Script di menu <b>Pengaturan</b> → <b>Koneksi Spreadsheet</b>.
+  </div>
+
+  <main>
+    <!-- ===== KASIR ===== -->
+    <section id="scr-kasir" class="screen active">
+      <div class="search-wrap">
+        <span class="search-ico">🔍</span>
+        <input id="searchInput" type="search" placeholder="Cari menu…" autocomplete="off">
+        <button class="search-clear" type="button" title="Bersihkan" aria-label="Bersihkan pencarian">✕</button>
+      </div>
+      <div id="catChips" class="chips"></div>
+      <div id="menuGrid" class="menu-grid"><div class="empty">Memuat menu…</div></div>
+    </section>
+
+    <!-- ===== RIWAYAT ===== -->
+    <section id="scr-riwayat" class="screen">
+      <div class="stat-cards">
+        <div class="stat">
+          <span class="stat-num" id="statCount">0</span>
+          <span class="stat-label">Transaksi hari ini</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num" id="statOmset">Rp 0</span>
+          <span class="stat-label">Omset hari ini</span>
+        </div>
+      </div>
+      <div id="salesList" class="sales-list"><div class="empty">Memuat riwayat…</div></div>
+    </section>
+
+    <!-- ===== KELOLA MENU & KATEGORI ===== -->
+    <section id="scr-menu" class="screen">
+      <div class="tabs">
+        <button id="tabMenu" class="tab active">🍌 Menu</button>
+        <button id="tabKategori" class="tab">🏷 Kategori</button>
+      </div>
+      <div id="menuSection">
+        <div class="section-head">
+          <h2>🍌 Daftar Menu</h2>
+          <button id="btnAddMenu" class="btn btn-primary btn-sm">＋ Tambah Menu</button>
+        </div>
+        <div class="search-wrap">
+          <span class="search-ico">🔍</span>
+          <input id="menuSearch" type="search" placeholder="Cari nama menu…" autocomplete="off">
+          <button class="search-clear" type="button" title="Bersihkan" aria-label="Bersihkan pencarian">✕</button>
+        </div>
+        <div id="menuCatChips" class="chips"></div>
+        <div id="menuList" class="menu-list"><div class="empty">Memuat menu…</div></div>
+      </div>
+      <div id="catSection" class="hidden">
+        <div class="section-head">
+          <h2>🏷 Daftar Kategori</h2>
+          <button id="btnAddCat" class="btn btn-primary btn-sm">＋ Tambah Kategori</button>
+        </div>
+        <div id="catList" class="menu-list"><div class="empty">Memuat kategori…</div></div>
+      </div>
+    </section>
+
+    <!-- ===== PENGATURAN ===== -->
+    <section id="scr-setting" class="screen">
+      <div class="card">
+        <h3>🔌 Koneksi Spreadsheet (GAS)</h3>
+        <label>URL Web App Google Apps Script</label>
+        <input id="setGasUrl" type="url" placeholder="https://script.google.com/macros/s/…/exec">
+        <label>Token (opsional)</label>
+        <input id="setToken" type="text" placeholder="Token rahasia Anda">
+        <div class="row">
+          <button id="btnSaveConn" class="btn btn-primary flex1">💾 Simpan & Muat Ulang</button>
+          <button id="btnTestConn" class="btn btn-soft">Uji</button>
+        </div>
+        <div id="connResult" class="conn-result"></div>
+      </div>
+
+      <div class="card">
+        <h3>🏪 Data Toko <small>(tercetak di struk)</small></h3>
+        <label>Nama Toko</label>
+        <input id="setNama" type="text" placeholder="PISANG MADU QUEENA">
+        <label>Alamat</label>
+        <input id="setAlamat" type="text" placeholder="Candirenggo, Singosari - Malang">
+        <label>Telepon / WhatsApp</label>
+        <input id="setTelp" type="text" placeholder="0819-4534-8703">
+        <label>Footer Struk <small>(bisa lebih dari 1 baris)</small></label>
+        <textarea id="setFooter" rows="3" placeholder="Terima kasih!&#10;Sampai jumpa lagi 😊"></textarea>
+        <p class="hint">Tekan <b>Enter</b> untuk baris baru. Contoh: baris 1 ucapan terima kasih, baris 2 ajakan follow IG, dst.</p>
+        <button id="btnSaveSettings" class="btn btn-primary btn-block">💾 Simpan Pengaturan</button>
+      </div>
+
+      <div class="card">
+        <h3>🖨 Printer Bluetooth</h3>
+        <label>Lebar Kertas Printer</label>
+        <div class="cash-chips" id="printerWidthChips">
+          <button class="cash-chip" data-w="58">58 mm (kecil)</button>
+          <button class="cash-chip" data-w="80">80 mm (lebar)</button>
+        </div>
+        <p id="printerInfo" class="hint">Pilih sesuai kertas printer kamu, lalu tekan tes cetak.</p>
+        <button id="btnTestPrint" class="btn btn-soft btn-block">🖨 Tes Cetak Struk</button>
+        <label class="switch-row">Cetak otomatis setelah pembayaran
+          <span class="switch"><input type="checkbox" id="setAutoPrint"><span></span></span>
+        </label>
+        <label class="switch-row">Logo ShopeeFood / GoFood / GrabFood di struk
+          <span class="switch"><input type="checkbox" id="setFoodLogos" checked><span></span></span>
+        </label>
+        <p class="hint">Logo aplikasi pesan-antar tampil di bagian bawah struk ("Tersedia juga di:") — promosi gratis tiap transaksi 📣</p>
+      </div>
+
+      <div class="card">
+        <h3>💾 Data</h3>
+        <div class="row" id="syncRow">
+          <button id="btnSync" class="btn btn-soft flex1">🔄 Sinkronkan Antrian</button>
+          <button id="btnSetupMenu" class="btn btn-soft flex1">🍌 Muat Contoh Menu</button>
+        </div>
+        <div class="row" id="resetRow">
+          <button id="btnResetDemo" class="btn btn-danger-soft flex1">🗑 Reset Data Demo</button>
+        </div>
+        <p class="hint">Transaksi belum tersimpan (server offline): <b id="pendingCount">0</b></p>
+      </div>
+
+      <p class="version">PISANG MADU QUEENA v1.4 · PWA + Google Apps Script + Spreadsheet</p>
+    </section>
+  </main>
+
+  <!-- ===== BOTTOM NAV ===== -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-screen="scr-kasir"><span class="nav-ico">🛒</span><span>Kasir</span></button>
+    <button class="nav-btn" data-screen="scr-riwayat"><span class="nav-ico">🧾</span><span>Riwayat</span></button>
+    <button class="nav-btn" data-screen="scr-menu"><span class="nav-ico">🍌</span><span>Menu</span></button>
+    <button class="nav-btn" data-screen="scr-setting"><span class="nav-ico">⚙️</span><span>Setting</span></button>
+  </nav>
+
+  <!-- ===== CART BAR ===== -->
+  <div id="cartBar" class="cart-bar hidden">
+    <div class="cart-bar-info">
+      <span id="cartCount">0 item</span>
+      <b id="cartTotal">Rp 0</b>
+    </div>
+    <button id="btnOpenCart" class="btn btn-cart">Lihat Pesanan →</button>
+  </div>
+
+  <!-- ===== SHEET KERANJANG ===== -->
+  <div id="cartSheet" class="sheet hidden">
+    <div class="sheet-mask" data-close="cartSheet"></div>
+    <div class="sheet-panel">
+      <div class="sheet-head">
+        <h2>🧾 Pesanan</h2>
+        <button class="sheet-close" data-close="cartSheet">✕</button>
+      </div>
+      <div id="cartItems" class="cart-items"></div>
+      <div class="cart-sum">
+        <div class="sum-row"><span>Subtotal</span><b id="sumSubtotal">Rp 0</b></div>
+      </div>
+
+      <div class="pay-method">
+        <span class="chip active">💵 Tunai</span>
+      </div>
+
+      <div id="cashWrap" class="cash-wrap">
+        <div class="cash-chips">
+          <button class="cash-chip" data-cash="pas">Uang Pas</button>
+          <button class="cash-chip" data-cash="20000">20rb</button>
+          <button class="cash-chip" data-cash="50000">50rb</button>
+          <button class="cash-chip" data-cash="100000">100rb</button>
+        </div>
+        <label>Uang Diterima</label>
+        <input id="cashInput" type="number" inputmode="numeric" placeholder="0">
+        <div class="sum-row change"><span>Kembalian</span><b id="changeVal">Rp 0</b></div>
+      </div>
+
+      <button id="btnPay" class="btn btn-primary btn-block btn-lg" disabled>💳 Bayar & Cetak Struk</button>
+    </div>
+  </div>
+
+  <!-- ===== MODAL STRUK ===== -->
+  <div id="receiptModal" class="sheet hidden">
+    <div class="sheet-mask" data-close="receiptModal"></div>
+    <div class="sheet-panel receipt-panel">
+      <div class="sheet-head">
+        <h2>🧾 Struk</h2>
+        <button class="sheet-close" data-close="receiptModal">✕</button>
+      </div>
+      <div id="receiptPaper" class="receipt-paper"></div>
+      <div id="printStatus" class="print-status"></div>
+      <div class="row">
+        <button id="btnPrint" class="btn btn-primary flex1">🖨 Cetak Bluetooth</button>
+        <button class="btn btn-soft" data-close="receiptModal">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL FORM MENU ===== -->
+  <div id="menuModal" class="sheet hidden">
+    <div class="sheet-mask" data-close="menuModal"></div>
+    <div class="sheet-panel">
+      <div class="sheet-head">
+        <h2 id="menuModalTitle">Tambah Menu</h2>
+        <button class="sheet-close" data-close="menuModal">✕</button>
+      </div>
+      <label>Nama Menu *</label>
+      <input id="mfNama" type="text" placeholder="contoh: Pisang Madu Coklat" autocomplete="off">
+      <label>Harga (Rp) *</label>
+      <input id="mfHarga" type="number" inputmode="numeric" placeholder="12000">
+      <label>Kategori</label>
+      <input id="mfKategori" type="text" list="catList" placeholder="contoh: Pisang Madu" autocomplete="off">
+      <datalist id="catList"></datalist>
+      <label>Emoji (opsional)</label>
+      <input id="mfEmoji" type="text" maxlength="8" placeholder="🍌">
+      <label>Foto Menu (opsional)</label>
+      <div class="photo-pick">
+        <div class="photo-prev" id="mfFotoPrev">🍌</div>
+        <div class="photo-actions">
+          <button type="button" class="btn btn-soft" id="btnPickFoto">📷 Pilih Foto</button>
+          <button type="button" class="btn btn-danger-soft" id="btnClearFoto">Hapus Foto</button>
+        </div>
+      </div>
+      <input type="file" id="mfFotoFile" accept="image/*" class="hidden">
+      <div class="row">
+        <input id="mfFotoUrl" type="url" placeholder="atau tempel URL gambar…" autocomplete="off">
+        <button type="button" class="btn btn-soft" id="btnUseUrl">Pakai URL</button>
+      </div>
+      <label class="switch-row">Menu aktif
+        <span class="switch"><input type="checkbox" id="mfAktif" checked><span></span></span>
+      </label>
+      <div class="row">
+        <button id="btnSaveMenu" class="btn btn-primary flex1">💾 Simpan Menu</button>
+        <button class="btn btn-soft" data-close="menuModal">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL FORM KATEGORI ===== -->
+  <div id="catModal" class="sheet hidden">
+    <div class="sheet-mask" data-close="catModal"></div>
+    <div class="sheet-panel">
+      <div class="sheet-head">
+        <h2 id="catModalTitle">Tambah Kategori</h2>
+        <button class="sheet-close" data-close="catModal">✕</button>
+      </div>
+      <label>Nama Kategori *</label>
+      <input id="cfNama" type="text" placeholder="contoh: Pisang Goreng" autocomplete="off">
+      <label>Emoji (opsional)</label>
+      <input id="cfEmoji" type="text" maxlength="8" placeholder="🍌">
+      <p class="hint">💡 Jika kategori diubah namanya, semua menu di kategori itu ikut berubah. Menu pada kategori yang dihapus dipindah ke "Umum".</p>
+      <div class="row">
+        <button id="btnSaveCat" class="btn btn-primary flex1">💾 Simpan Kategori</button>
+        <button class="btn btn-soft" data-close="catModal">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+</div>
+
+<noscript><p style="text-align:center;padding:40px">Aktifkan JavaScript untuk menggunakan aplikasi kasir.</p></noscript>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/logos.js"></script>
+<script src="js/print.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
