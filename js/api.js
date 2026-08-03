@@ -4,6 +4,29 @@
    Content-Type text/plain agar tidak memicu CORS preflight.
    ============================================================ */
 const Api = {
+  /* Kirim POST, tangani redirect khas Apps Script:
+     Google kadang me-302 ke URL ber-token, dan browser mengubah
+     POST → GET saat redirect (data hilang). Solusi: jika fetch
+     melaporkan redirect, kirim ulang POST ke URL final. */
+  async post(url, body, ctrl) {
+    let res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body,
+      signal: ctrl.signal,
+      redirect: 'follow',
+    });
+    if (res.redirected && res.url && res.url !== url) {
+      res = await fetch(res.url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body,
+        signal: ctrl.signal,
+      });
+    }
+    return res;
+  },
+
   async call(action, payload = {}) {
     if (!CONFIG.GAS_URL || !String(CONFIG.GAS_URL).trim()) {
       throw new Error('URL GAS belum diisi (mode demo)');
@@ -13,21 +36,25 @@ const Api = {
       Object.assign({ action }, payload, { token: CONFIG.TOKEN })
     );
 
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 25000);
+    let res = null;
+    let lastErr = null;
+    // Auto-retry 2x (total 3 percobaan) — tahan jaringan tidak stabil
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 25000);
+      try {
+        res = await this.post(CONFIG.GAS_URL, body, ctrl);
+        break;
+      } catch (e) {
+        lastErr = e;
+        await new Promise(r => setTimeout(r, 600 * (attempt + 1)));
+      } finally {
+        clearTimeout(timer);
+      }
+    }
 
-    let res;
-    try {
-      res = await fetch(CONFIG.GAS_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body,
-        signal: ctrl.signal,
-      });
-    } catch (e) {
+    if (!res) {
       throw new Error('Server tidak terjangkau. Cek koneksi internet / URL GAS.');
-    } finally {
-      clearTimeout(timer);
     }
 
     let data;

@@ -31,8 +31,11 @@ var CONFIG = {
 };
 
 // Override dari localStorage (tersimpan saat ubah lewat menu Pengaturan)
+// — hanya dipakai jika URL valid (mencegah URL lama/terpotong merusak)
 try {
   var savedCfg = JSON.parse(localStorage.getItem('pq_config') || '{}');
-  if (savedCfg.GAS_URL) CONFIG.GAS_URL = savedCfg.GAS_URL;
+  if (savedCfg.GAS_URL && /^https:\/\/script\.google\.com\/macros\/s\/.+/.test(savedCfg.GAS_URL)) {
+    CONFIG.GAS_URL = savedCfg.GAS_URL;
+  }
   if (savedCfg.TOKEN) CONFIG.TOKEN = savedCfg.TOKEN;
 } catch (e) {}
