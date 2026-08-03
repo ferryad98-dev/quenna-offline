@@ -55,6 +55,14 @@ function route_(e) {
     switch (action) {
       case 'setup':          return out_(setup_(ss, body.reset === true));
       case 'getMenu':        return out_({ ok: true, menu: readMenu_(ss) });
+      // 1 panggilan untuk semua data (mempercepat loading awal)
+      case 'getAll':         return out_({
+        ok: true,
+        menu: readMenu_(ss),
+        categories: readCategories_(ss),
+        settings: readSettings_(ss),
+        sales: readSales_(ss, 200),
+      });
       case 'saveMenu':       return out_(saveMenu_(ss, body.item));
       case 'deleteMenu':     return out_(deleteMenu_(ss, body.id));
       case 'getCategories':  return out_({ ok: true, categories: readCategories_(ss) });

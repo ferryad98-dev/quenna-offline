@@ -43,6 +43,7 @@ const Api = {
   },
 
   getMenu()           { return this.call('getMenu'); },
+  getAll()            { return this.call('getAll'); },
   saveMenu(item)      { return this.call('saveMenu', { item }); },
   deleteMenu(id)      { return this.call('deleteMenu', { id }); },
 

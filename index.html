@@ -56,12 +56,19 @@
       <div class="stat-cards">
         <div class="stat">
           <span class="stat-num" id="statCount">0</span>
-          <span class="stat-label">Transaksi hari ini</span>
+          <span class="stat-label" id="statCountLabel">Transaksi · Hari Ini</span>
         </div>
         <div class="stat">
           <span class="stat-num" id="statOmset">Rp 0</span>
-          <span class="stat-label">Omset hari ini</span>
+          <span class="stat-label" id="statOmsetLabel">Omset · Hari Ini</span>
         </div>
+      </div>
+      <div id="historyFilter" class="chips">
+        <button class="chip active" data-range="today">📅 Hari Ini</button>
+        <button class="chip" data-range="yesterday">Kemarin</button>
+        <button class="chip" data-range="7d">7 Hari</button>
+        <button class="chip" data-range="month">Bulan Ini</button>
+        <button class="chip" data-range="all">Semua</button>
       </div>
       <div id="salesList" class="sales-list"><div class="empty">Memuat riwayat…</div></div>
     </section>
@@ -153,7 +160,7 @@
         <p class="hint">Transaksi belum tersimpan (server offline): <b id="pendingCount">0</b></p>
       </div>
 
-      <p class="version">PISANG MADU QUEENA v1.4 · PWA + Google Apps Script + Spreadsheet</p>
+      <p class="version">PISANG MADU QUEENA v1.5 · PWA + Google Apps Script + Spreadsheet</p>
     </section>
   </main>
 
@@ -285,6 +292,14 @@
   </div>
 
   <div id="toast" class="toast"></div>
+
+  <!-- ===== OVERLAY SINKRON (loading) ===== -->
+  <div id="syncOverlay" class="sync-overlay hidden">
+    <div class="sync-box">
+      <div class="spinner"></div>
+      <p id="syncMsg">Menyinkronkan data dari spreadsheet…</p>
+    </div>
+  </div>
 </div>
 
 <noscript><p style="text-align:center;padding:40px">Aktifkan JavaScript untuk menggunakan aplikasi kasir.</p></noscript>

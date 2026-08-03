@@ -203,6 +203,8 @@ pisang-madu-queena/
 - **Data transaksi** tersimpan di spreadsheet: sheet `TRANSAKSI` (nomor, tanggal, jam, detail item JSON, subtotal, total, metode, bayar, kembali, kasir). Bisa diolah lebih lanjut (laporan, pivot, dll).
 - **Satu spreadsheet = satu kasir/pusat data**. Beberapa HP bisa pakai URL GAS yang sama, semua transaksi masuk ke spreadsheet yang sama.
 - **Antrian offline**: jika internet mati saat pembayaran, transaksi ditandai `ANTRE` di Riwayat dan otomatis dikirim begitu online.
+- **Cepat & ada indikator loading**: data pertama kali dimuat dalam **1 panggilan** (`getAll`) dengan tampilan instan dari cache lokal (stale-while-revalidate). Saat sinkron berjalan muncul **spinner 'Menyinkronkan data dari spreadsheet…'** dan titik status di header berkedip.
+- **Rekap riwayat per periode**: di tab Riwayat ada filter **Hari Ini / Kemarin / 7 Hari / Bulan Ini / Semua** — jumlah transaksi & omset otomatis dihitung ulang per periode terpilih.
 - **Auto-sync realtime**: selama aplikasi terbuka (tab aktif), data otomatis ditarik dari spreadsheet setiap ±30 detik — menu/kategori/setting/riwayat yang diubah dari HP lain atau langsung di spreadsheet langsung terlihat tanpa perlu buka-tutup aplikasi. Transaksi antrian juga otomatis terkirim. Tombol **🔄 Sinkronkan Antrian** tetap tersedia untuk sinkron manual instan.
 - **Ganti harga / tambah menu** langsung dari aplikasi: menu **🍌 Menu** — perubahan langsung masuk spreadsheet (bukan cuma di HP).
 - **Upgrade dari versi lama**: contoh menu sekarang berisi 39 varian pisang (Goreng/Bakar/Katsu) tanpa kategori Minuman. Jika spreadsheet Anda masih berisi menu contoh lama, buka **Pengaturan → "🍌 Muat Contoh Menu"** untuk mengganti dengan daftar baru, atau hapus manual via tab Menu.

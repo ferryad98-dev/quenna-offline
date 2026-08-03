@@ -149,6 +149,47 @@ const Pending = {
 const Data = {
   isDemo() { return !String(CONFIG.GAS_URL || '').trim(); },
 
+  /* Data terakhir yang berhasil di-fetch (untuk tampil instan) */
+  getCachedAll() {
+    if (this.isDemo()) return null;
+    const menu = LS.get('pq_menu_cache', null);
+    const categories = LS.get('pq_cats_cache', null);
+    const settings = LS.get('pq_settings_cache', null);
+    if (!menu || !categories || !settings) return null;
+    return { menu, categories, settings };
+  },
+
+  /* Tarik SEMUA data dalam 1 panggilan (getAll) — jauh lebih cepat.
+     Fallback: panggil paralel bila backend lama belum punya getAll. */
+  async fetchAll() {
+    if (this.isDemo()) {
+      return {
+        settings: await this.getSettings(),
+        categories: await this.getCategories(),
+        menu: await this.getMenu(),
+        sales: null,
+      };
+    }
+    try {
+      const r = await Api.getAll();
+      LS.set('pq_menu_cache', r.menu);
+      LS.set('pq_cats_cache', r.categories);
+      LS.set('pq_settings_cache', r.settings);
+      return { settings: r.settings, categories: r.categories, menu: r.menu, sales: r.sales };
+    } catch (e) {
+      const [settings, categories, menu] = await Promise.all([
+        Api.getSettings().then(r => r.settings).catch(() => null),
+        Api.getCategories().then(r => r.categories).catch(() => null),
+        Api.getMenu().then(r => r.menu).catch(() => null),
+      ]);
+      if (!menu) throw e;
+      LS.set('pq_menu_cache', menu);
+      if (categories) LS.set('pq_cats_cache', categories);
+      if (settings) LS.set('pq_settings_cache', settings);
+      return { settings, categories, menu, sales: null };
+    }
+  },
+
   /* ---------- MENU ---------- */
   async getMenu() {
     if (this.isDemo()) return LS.get('pq_demo_menu', DEMO_MENU_FULL);
@@ -587,16 +628,44 @@ async function loadSales() {
   renderSales();
 }
 
+/* ===== FILTER RIWAYAT PER PERIODE ===== */
+const RANGE_LABELS = { today: 'Hari Ini', yesterday: 'Kemarin', '7d': '7 Hari Terakhir', month: 'Bulan Ini', all: 'Semua Waktu' };
+let historyRange = 'today';
+
+function dateStr(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+
+function inRange(tanggal, range) {
+  const t = String(tanggal || '').slice(0, 10);
+  if (t.length < 10) return false;
+  const now = new Date();
+  const today = dateStr(now);
+  if (range === 'today') return t === today;
+  if (range === 'yesterday') {
+    const d = new Date(now); d.setDate(d.getDate() - 1);
+    return t === dateStr(d);
+  }
+  if (range === '7d') {
+    const d = new Date(now); d.setDate(d.getDate() - 6);
+    return t >= dateStr(d) && t <= today;
+  }
+  if (range === 'month') return t.slice(0, 7) === today.slice(0, 7);
+  return true; // all
+}
+
 function renderSales() {
-  const list = State.sales;
-  const today = nowDate();
-  const t = list.filter(s => String(s.tanggal || '').slice(0, 10) === today);
-  $('#statCount').textContent = String(t.length);
-  $('#statOmset').textContent = fmtRp(t.reduce((s, x) => s + (Number(x.total) || 0), 0));
+  const list = State.sales.filter(s => inRange(s.tanggal, historyRange));
+  const total = list.reduce((s, x) => s + (Number(x.total) || 0), 0);
+  const label = RANGE_LABELS[historyRange] || 'Hari Ini';
+
+  $('#statCount').textContent = String(list.length);
+  $('#statOmset').textContent = fmtRp(total);
+  const cl = $('#statCountLabel'); if (cl) cl.textContent = 'Transaksi · ' + label;
+  const ol = $('#statOmsetLabel'); if (ol) ol.textContent = 'Omset · ' + label;
+  $$('#historyFilter .chip').forEach(c => c.classList.toggle('active', c.dataset.range === historyRange));
 
   const wrap = $('#salesList');
   if (!list.length) {
-    wrap.innerHTML = `<div class="empty">Belum ada transaksi.<br>Transaksi yang sudah dibayar muncul di sini.</div>`;
+    wrap.innerHTML = `<div class="empty">Belum ada transaksi di periode ini.<br>Transaksi yang sudah dibayar muncul di sini.</div>`;
     return;
   }
   wrap.innerHTML = list.map(s =>
@@ -875,7 +944,7 @@ function saveConnection() {
   CONFIG.GAS_URL = $('#setGasUrl').value.trim();
   CONFIG.TOKEN = $('#setToken').value.trim();
   LS.set('pq_config', { GAS_URL: CONFIG.GAS_URL, TOKEN: CONFIG.TOKEN });
-  refreshAll(false);
+  refreshAll(false, true);
   toast('Koneksi disimpan — memuat ulang data…', 'info');
 }
 
@@ -939,22 +1008,60 @@ function setGasDot(state) {
   dot.className = 'dot ' + (state || '');
   dot.title = state === 'ok' ? 'Terhubung ke spreadsheet'
     : state === 'bad' ? 'Server tidak terjangkau'
+    : state === 'sync' ? 'Menyinkronkan data…'
     : state === 'demo' ? 'Mode demo (tanpa server)' : 'Memeriksa…';
 }
 
-async function refreshAll(silent) {
-  setGasDot('');
+/* ===== Overlay loading (spinner "Menyinkronkan…") ===== */
+function showSyncOverlay(msg) {
+  const m = $('#syncMsg');
+  if (m) m.textContent = msg || 'Menyinkronkan data dari spreadsheet…';
+  const o = $('#syncOverlay');
+  if (o) o.classList.remove('hidden');
+}
+function hideSyncOverlay() {
+  const o = $('#syncOverlay');
+  if (o) o.classList.add('hidden');
+}
+
+async function refreshAll(silent, showLoading) {
+  setGasDot('sync');
+  if (showLoading) showSyncOverlay();
+
+  // 1) Tampilkan data tersimpan (cache) dulu → instan, tanpa menunggu server
+  const cached = Data.getCachedAll();
+  if (cached) {
+    State.settings = cached.settings;
+    State.categories = cached.categories;
+    State.menu = cached.menu;
+    mergeCategories();
+    updateBrand();
+    fillSettingsForm();
+    renderAll();
+  }
+
+  // 2) Tarik data terbaru: 1 panggilan getAll (atau paralel bila GAS lama)
   try {
-    State.settings = await Data.getSettings();
-    State.categories = await Data.getCategories();
-    State.menu = await Data.getMenu();
+    const fresh = await Data.fetchAll();
+    State.settings = fresh.settings;
+    State.categories = fresh.categories;
+    State.menu = fresh.menu;
+    mergeCategories();
     setGasDot(Data.isDemo() ? 'demo' : 'ok');
     if (!silent && !Data.isDemo()) toast('Terhubung ke spreadsheet ✔', 'ok');
+    if (fresh.sales) {
+      State.sales = mergeSales(fresh.sales, Pending.all());
+      renderSales();
+    } else {
+      await loadSales();
+    }
   } catch (e) {
     setGasDot(Data.isDemo() ? 'demo' : 'bad');
     if (!silent) toast('Gagal hubungi server: ' + e.message, 'err');
+  } finally {
+    if (showLoading) hideSyncOverlay();
   }
-  mergeCategories();
+
   $('#demoBanner').classList.toggle('hidden', !Data.isDemo());
   // Setting → Data: tombol yang tidak relevan disembunyikan sesuai mode
   $('#syncRow').style.display = Data.isDemo() ? 'none' : '';
@@ -962,7 +1069,6 @@ async function refreshAll(silent) {
   updateBrand();
   fillSettingsForm();
   renderAll();
-  await loadSales();
   updatePendingBadge();
 }
 
@@ -1213,7 +1319,7 @@ async function init() {
   bindEvents();
   renderCartBar();
   showMenuTab('menu');
-  await refreshAll(true);
+  await refreshAll(true, true);
 
   // Auto-sync realtime saat aplikasi terbuka (mode server)
   if (!Data.isDemo()) startAutoSync();
