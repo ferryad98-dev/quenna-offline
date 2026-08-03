@@ -341,6 +341,11 @@ function readSales_(ss, limit) {
     'NO', 'TANGGAL', 'JAM', 'ITEMS', 'JUMLAH_ITEM',
     'SUBTOTAL', 'DISKON', 'TOTAL', 'METODE', 'BAYAR', 'KEMBALI', 'KASIR',
   ]);
+  const tz = Session.getScriptTimeZone();
+  // Google Sheets mengubah string tanggal/jam menjadi Date →
+  // normalisasi kembali ke format teks "yyyy-MM-dd" & "HH:mm".
+  const fmtDate = v => (v instanceof Date) ? Utilities.formatDate(v, tz, 'yyyy-MM-dd') : String(v || '');
+  const fmtTime = v => (v instanceof Date) ? Utilities.formatDate(v, tz, 'HH:mm') : String(v || '');
   const rows = sh.getDataRange().getValues().slice(1);
   return rows
     .filter(r => r[0] && r[3])
@@ -350,9 +355,10 @@ function readSales_(ss, limit) {
       let items = [];
       try { items = JSON.parse(r[3]); } catch (e) { items = []; }
       return {
-        no: String(r[0]),
-        tanggal: String(r[1]),
-        jam: String(r[2]),
+        // Sheets juga menghapus leading zero "001" → jadikan 3 digit lagi
+        no: String(r[0]).padStart(3, '0'),
+        tanggal: fmtDate(r[1]),
+        jam: fmtTime(r[2]),
         items,
         qty: Number(r[4]) || 0,
         subtotal: Number(r[5]) || 0,
