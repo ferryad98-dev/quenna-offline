@@ -108,22 +108,8 @@
 
     <!-- ===== PENGATURAN ===== -->
     <section id="scr-setting" class="screen">
-      <div class="card">
-        <h3>🔌 Koneksi Spreadsheet (GAS)</h3>
-        <label>URL Web App Google Apps Script</label>
-        <input id="setGasUrl" type="url" placeholder="https://script.google.com/macros/s/…/exec">
-        <label>Token (opsional)</label>
-        <input id="setToken" type="text" placeholder="Token rahasia Anda">
-        <div class="row">
-          <button id="btnSaveConn" class="btn btn-primary flex1">💾 Simpan & Muat Ulang</button>
-          <button id="btnTestConn" class="btn btn-soft">Uji</button>
-        </div>
-        <div class="row">
-          <button id="btnResetUrl" class="btn btn-soft flex1">↺ Gunakan URL Bawaan</button>
-        </div>
-        <div id="connResult" class="conn-result"></div>
-      </div>
 
+      <!-- 1. DATA TOKO (paling utama) -->
       <div class="card">
         <h3>🏪 Data Toko <small>(tercetak di struk)</small></h3>
         <label>Nama Toko</label>
@@ -138,6 +124,7 @@
         <button id="btnSaveSettings" class="btn btn-primary btn-block">💾 Simpan Pengaturan</button>
       </div>
 
+      <!-- 2. PRINTER BLUETOOTH -->
       <div class="card">
         <h3>🖨 Printer Bluetooth</h3>
         <label>Lebar Kertas Printer</label>
@@ -156,6 +143,25 @@
         <p class="hint">Logo aplikasi pesan-antar tampil di bagian bawah struk ("Tersedia juga di:") — promosi gratis tiap transaksi 📣</p>
       </div>
 
+      <!-- 3. KONEKSI SPREADSHEET -->
+      <div class="card">
+        <h3>🔌 Koneksi Spreadsheet <small>(jarang diubah)</small></h3>
+        <label>URL Web App Google Apps Script</label>
+        <input id="setGasUrl" type="url" placeholder="https://script.google.com/macros/s/…/exec">
+        <label>Token <small>(opsional)</small></label>
+        <input id="setToken" type="text" placeholder="Token rahasia Anda">
+        <div class="row">
+          <button id="btnSaveConn" class="btn btn-primary flex1">💾 Simpan & Muat Ulang</button>
+          <button id="btnTestConn" class="btn btn-soft">Uji</button>
+        </div>
+        <div class="row">
+          <button id="btnResetUrl" class="btn btn-soft flex1">↺ Gunakan URL Bawaan</button>
+        </div>
+        <div id="connResult" class="conn-result"></div>
+        <p class="hint">Umumnya tidak perlu diubah — URL sudah terpasang otomatis.</p>
+      </div>
+
+      <!-- 4. DATA -->
       <div class="card">
         <h3>💾 Data</h3>
         <div class="row" id="syncRow">
@@ -166,11 +172,11 @@
           <button id="btnSetupMenu" class="btn btn-soft flex1">🍌 Muat Contoh Menu</button>
           <button id="btnResetDemo" class="btn btn-danger-soft flex1">🗑 Reset Data Demo</button>
         </div>
-        <p class="hint">💡 Ubah menu/kategori/transaksi langsung di spreadsheet? Tekan <b>📥 Muat Ulang Data</b> agar aplikasi langsung menampilkan data terbaru (atau tunggu auto-sync ±30 detik).</p>
+        <p class="hint">💡 Ubah data langsung di spreadsheet? Tekan <b>📥 Muat Ulang Data</b> agar aplikasi langsung menampilkannya (atau tunggu auto-sync ±30 detik).</p>
         <p class="hint">Transaksi belum tersimpan (server offline): <b id="pendingCount">0</b></p>
       </div>
 
-      <p class="version">PISANG MADU QUEENA v1.6.4 · PWA + Google Apps Script + Spreadsheet</p>
+      <p class="version">PISANG MADU QUEENA v1.6.5 · PWA + Google Apps Script + Spreadsheet</p>
     </section>
   </main>
 
