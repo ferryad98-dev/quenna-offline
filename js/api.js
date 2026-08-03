@@ -70,6 +70,6 @@ const Api = {
   saveCategory(cat)   { return this.call('saveCategory', { category: cat }, { timeout: 25000, retries: 2 }); },
   deleteCategory(id)  { return this.call('deleteCategory', { id }, { timeout: 25000, retries: 2 }); },
   saveSettings(settings) { return this.call('saveSettings', { settings }, { timeout: 25000, retries: 2 }); },
-  saveSale(sale)      { return this.call('saveSale', { sale }, { timeout: 25000, retries: 2 }); },
+  saveSale(sale)      { return this.call('saveSale', { sale }, { timeout: 30000, retries: 1 }); },
   setup(reset)        { return this.call('setup', { reset: reset === true }, { timeout: 90000, retries: 0 }); },
 };

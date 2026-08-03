@@ -527,6 +527,7 @@ async function doPay() {
   const bayar = Number(State.cash) || 0;
   const pembeli = $('#buyerName').value.trim();
   const sale = {
+    id: uid(), // ID unik transaksi → cegah duplikat saat retry
     tanggal: nowDate(), jam: nowTime(),
     pembeli,
     items, subtotal: total, diskon: 0, total,

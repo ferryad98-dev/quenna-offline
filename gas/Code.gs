@@ -316,7 +316,7 @@ function saveSale_(ss, sale) {
   }
   const sh = sheet_(ss, 'TRANSAKSI', [
     'NO', 'TANGGAL', 'JAM', 'ITEMS', 'JUMLAH_ITEM',
-    'SUBTOTAL', 'DISKON', 'TOTAL', 'METODE', 'BAYAR', 'KEMBALI', 'KASIR', 'NAMA_PEMBELI',
+    'SUBTOTAL', 'DISKON', 'TOTAL', 'METODE', 'BAYAR', 'KEMBALI', 'KASIR', 'NAMA_PEMBELI', 'ID_TRANSAKSI',
   ]);
 
   const items = sale.items.map(it => ({
@@ -344,6 +344,28 @@ function saveSale_(ss, sale) {
     ? Utilities.formatDate(v, tz, 'yyyy-MM-dd')
     : String(v || '').slice(0, 10);
   const dataRows = sh.getDataRange().getValues().slice(1);
+
+  // IDEMPOTENCY: jika transaksi dengan ID yang sama sudah tersimpan
+  // (mis. karena retry saat GAS lambat), JANGAN simpan ulang — cukup
+  // kembalikan transaksi yang sudah ada. Mencegah duplikat 3x.
+  const saleId = String(sale.id || '');
+  if (saleId) {
+    const dup = dataRows.find(r => r.length > 13 && String(r[13]) === saleId);
+    if (dup) {
+      return {
+        ok: true,
+        duplicated: true,
+        sale: {
+          no: String(dup[0]).padStart(3, '0'),
+          tanggal: fmtTgl(dup[1]),
+          jam: (dup[2] instanceof Date) ? Utilities.formatDate(dup[2], tz, 'HH:mm') : String(dup[2] || ''),
+          total: Number(dup[7]) || 0,
+          kembali: Number(dup[10]) || 0,
+        },
+      };
+    }
+  }
+
   const todayCount = dataRows.filter(r => fmtTgl(r[1]) === tanggal).length;
   const no = String(todayCount + 1).padStart(3, '0');
 
@@ -357,6 +379,7 @@ function saveSale_(ss, sale) {
     subtotal, diskon, total, metode, bayar, kembali,
     String(sale.kasir || 'Kasir'),
     String(sale.pembeli || ''),
+    saleId,
   ]);
 
   return { ok: true, sale: { no, tanggal, jam, total, kembali } };
@@ -365,7 +388,7 @@ function saveSale_(ss, sale) {
 function readSales_(ss, limit) {
   const sh = sheet_(ss, 'TRANSAKSI', [
     'NO', 'TANGGAL', 'JAM', 'ITEMS', 'JUMLAH_ITEM',
-    'SUBTOTAL', 'DISKON', 'TOTAL', 'METODE', 'BAYAR', 'KEMBALI', 'KASIR', 'NAMA_PEMBELI',
+    'SUBTOTAL', 'DISKON', 'TOTAL', 'METODE', 'BAYAR', 'KEMBALI', 'KASIR', 'NAMA_PEMBELI', 'ID_TRANSAKSI',
   ]);
   const tz = Session.getScriptTimeZone();
   // Google Sheets mengubah string tanggal/jam menjadi Date →
@@ -395,6 +418,7 @@ function readSales_(ss, limit) {
         kembali: Number(r[10]) || 0,
         kasir: String(r[11] || ''),
         pembeli: r.length > 12 ? String(r[12] || '') : '',
+        id: r.length > 13 ? String(r[13] || '') : '',
       };
     });
 }
@@ -471,7 +495,7 @@ function setup_(ss, reset) {
   sheet_(ss, 'SETTINGS', ['KEY', 'VALUE']);
   sheet_(ss, 'TRANSAKSI', [
     'NO', 'TANGGAL', 'JAM', 'ITEMS', 'JUMLAH_ITEM',
-    'SUBTOTAL', 'DISKON', 'TOTAL', 'METODE', 'BAYAR', 'KEMBALI', 'KASIR', 'NAMA_PEMBELI',
+    'SUBTOTAL', 'DISKON', 'TOTAL', 'METODE', 'BAYAR', 'KEMBALI', 'KASIR', 'NAMA_PEMBELI', 'ID_TRANSAKSI',
   ]);
   const cSh = sheet_(ss, 'KATEGORI', CAT_HEADERS);
 
