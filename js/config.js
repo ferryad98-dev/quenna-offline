@@ -34,8 +34,13 @@ var CONFIG = {
 // — hanya dipakai jika URL valid (mencegah URL lama/terpotong merusak)
 try {
   var savedCfg = JSON.parse(localStorage.getItem('pq_config') || '{}');
-  if (savedCfg.GAS_URL && /^https:\/\/script\.google\.com\/macros\/s\/.+/.test(savedCfg.GAS_URL)) {
-    CONFIG.GAS_URL = savedCfg.GAS_URL;
+  var savedUrl = String(savedCfg.GAS_URL || '').trim().replace(/\/+$/, '');
+  if (savedUrl && /^https:\/\/script\.google\.com\/macros\/s\/.+/.test(savedUrl)) {
+    CONFIG.GAS_URL = savedUrl;
   }
   if (savedCfg.TOKEN) CONFIG.TOKEN = savedCfg.TOKEN;
 } catch (e) {}
+
+// URL bawaan (tidak bisa tertimpa) — dipakai sebagai cadangan otomatis
+// bila URL tersimpan di HP gagal/ganti deployment.
+var CONFIG_DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycby_6xj5BYYcvQoZ_9_lzwmVofcKtez3JsSkcoymE0ZPCCQGiScZH3a-vAq0UjK7fiXU-g/exec';

@@ -39,6 +39,11 @@
     ⚠️ <b>Mode Demo</b> — data hanya di perangkat ini. Isi URL Google Apps Script di menu <b>Pengaturan</b> → <b>Koneksi Spreadsheet</b>.
   </div>
 
+  <div id="serverBanner" class="server-banner hidden">
+    <span id="serverBannerMsg">⚠️ Server lambat / tidak terjangkau. Menampilkan data tersimpan.</span>
+    <button id="btnRetryServer" class="server-banner-btn">🔄 Coba Lagi</button>
+  </div>
+
   <main>
     <!-- ===== KASIR ===== -->
     <section id="scr-kasir" class="screen active">
@@ -113,6 +118,9 @@
           <button id="btnSaveConn" class="btn btn-primary flex1">💾 Simpan & Muat Ulang</button>
           <button id="btnTestConn" class="btn btn-soft">Uji</button>
         </div>
+        <div class="row">
+          <button id="btnResetUrl" class="btn btn-soft flex1">↺ Gunakan URL Bawaan</button>
+        </div>
         <div id="connResult" class="conn-result"></div>
       </div>
 
@@ -160,7 +168,7 @@
         <p class="hint">Transaksi belum tersimpan (server offline): <b id="pendingCount">0</b></p>
       </div>
 
-      <p class="version">PISANG MADU QUEENA v1.5 · PWA + Google Apps Script + Spreadsheet</p>
+      <p class="version">PISANG MADU QUEENA v1.5.1 · PWA + Google Apps Script + Spreadsheet</p>
     </section>
   </main>
 

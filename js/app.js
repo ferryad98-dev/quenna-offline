@@ -1041,8 +1041,10 @@ async function refreshAll(silent, showLoading) {
   }
 
   // 2) Tarik data terbaru: 1 panggilan getAll (atau paralel bila GAS lama)
+  let fetchOk = false;
   try {
     const fresh = await Data.fetchAll();
+    fetchOk = true;
     State.settings = fresh.settings;
     State.categories = fresh.categories;
     State.menu = fresh.menu;
@@ -1058,8 +1060,23 @@ async function refreshAll(silent, showLoading) {
   } catch (e) {
     setGasDot(Data.isDemo() ? 'demo' : 'bad');
     if (!silent) toast('Gagal hubungi server: ' + e.message, 'err');
+    // Tampilkan banner peringatan (data tersimpan tetap tampil)
+    const bn = $('#serverBanner');
+    if (bn) {
+      bn.classList.remove('hidden');
+      const msg = $('#serverBannerMsg');
+      if (msg) msg.textContent = Data.isDemo()
+        ? 'Mode demo — data tersimpan di perangkat ini.'
+        : 'Server lambat / tidak terjangkau. Menampilkan data tersimpan.';
+    }
   } finally {
     if (showLoading) hideSyncOverlay();
+  }
+
+  // Sembunyikan banner hanya jika fetch berhasil (kecuali mode demo)
+  if (fetchOk && !Data.isDemo()) {
+    const bn = $('#serverBanner');
+    if (bn) bn.classList.add('hidden');
   }
 
   $('#demoBanner').classList.toggle('hidden', !Data.isDemo());
@@ -1235,6 +1252,12 @@ function bindEvents() {
   // Pengaturan
   $('#btnSaveConn').addEventListener('click', saveConnection);
   $('#btnTestConn').addEventListener('click', testConnection);
+  $('#btnResetUrl').addEventListener('click', () => {
+    if (!confirm('Gunakan URL bawaan (hapus URL tersimpan di HP ini)?')) return;
+    LS.set('pq_config', { GAS_URL: '', TOKEN: '' });
+    location.reload();
+  });
+  $('#btnRetryServer').addEventListener('click', () => refreshAll(false, true));
   $('#btnSaveSettings').addEventListener('click', saveSettingsForm);
   $('#btnTestPrint').addEventListener('click', async () => {
     const info = $('#printerInfo');
