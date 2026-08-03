@@ -553,3 +553,16 @@ body.no-scroll { overflow: hidden; }
 .toast-ok { background: #15803D; }
 .toast-err { background: #B91C1C; }
 .toast-warn { background: #B45309; }
+
+/* Tombol simpan sukses (flash hijau) */
+.btn-success-flash {
+  background: linear-gradient(180deg, #22C55E, #15803D) !important;
+  border-color: #15803D !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 6px 16px rgba(22,163,74,.4) !important;
+  animation: flashPulse .5s ease;
+}
+@keyframes flashPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}

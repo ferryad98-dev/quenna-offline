@@ -950,11 +950,28 @@ async function saveSettingsForm() {
   };
   State.settings = s;
   LS.set('pq_autoprint', $('#setAutoPrint').checked);
+  const btn = $('#btnSaveSettings');
+  const origText = btn.textContent;
+
+  // Feedback visual: tombol "menyimpan…"
+  btn.disabled = true;
+  btn.textContent = '⏳ Menyimpan ke spreadsheet…';
   try {
     await Data.saveSettings(s);
-    toast('Pengaturan disimpan ✔', 'ok');
+    // ✅ Notifikasi sukses yang JELAS (tahan 3,5 detik)
+    btn.textContent = '✔ Tersimpan di spreadsheet!';
+    btn.classList.add('btn-success-flash');
+    toast('✔ Pengaturan tersimpan ke spreadsheet — sudah ter-update!', 'ok', 3500);
+    // Kembalikan tombol normal setelah 1,8 detik
+    setTimeout(() => {
+      btn.textContent = origText;
+      btn.classList.remove('btn-success-flash');
+      btn.disabled = false;
+    }, 1800);
   } catch (e) {
-    toast('Gagal simpan: ' + e.message, 'err');
+    btn.textContent = origText;
+    btn.disabled = false;
+    toast('✖ Gagal simpan: ' + e.message, 'err', 4000);
   }
   updateBrand();
 }
