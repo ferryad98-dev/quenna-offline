@@ -1,6 +1,6 @@
-# 🍌 PISANG MADU QUEENA — Aplikasi Kasir Mobile
+# 🍌 KEDAI PISANG QUEENA — Aplikasi Kasir Mobile
 
-Aplikasi kasir berbasis **mobile web (PWA)** untuk usaha jualan online **PISANG MADU QUEENA**:
+Aplikasi kasir berbasis **mobile web (PWA)** untuk usaha jualan online **Kedai Pisang Queena**:
 
 - 🛒 **Kasir** — pilih menu (dengan foto asli), hitung otomatis, bayar **tunai**, hitung kembalian
 - 🖨 **Cetak struk Bluetooth** — printer thermal 58mm (ESC/POS via Web Bluetooth)
@@ -44,7 +44,7 @@ Aplikasi kasir berbasis **mobile web (PWA)** untuk usaha jualan online **PISANG 
 
 ## Langkah 1 — Siapkan Database & Backend (Google Apps Script)
 
-1. Buka [sheets.new](https://sheets.new) → buat spreadsheet baru (nama bebas, misal `DB PISANG MADU QUEENA`).
+1. Buka [sheets.new](https://sheets.new) → buat spreadsheet baru (nama bebas, misal `DB Kedai Pisang Queena`).
 2. Buka menu **Ekstensi → Apps Script**.
 3. Hapus isi editor, lalu **tempel seluruh isi file [`gas/Code.gs`](gas/Code.gs)**.
 4. Simpan (Ctrl+S), lalu klik **Deploy → New deployment**:
@@ -54,7 +54,7 @@ Aplikasi kasir berbasis **mobile web (PWA)** untuk usaha jualan online **PISANG 
    - Klik **Deploy** → saat diminta izin, **berikan akses ke Google Drive juga** (dipakai untuk menyimpan foto menu) → lalu **salin URL** yang berakhiran `/exec`.
 5. Sheet `MENU`, `KATEGORI`, `TRANSAKSI`, `SETTINGS` **dibuat otomatis** oleh script.
 
-> 💡 Untuk mengisi **contoh menu (39 varian, 3 kategori)** pertama kali: buka aplikasi → **Pengaturan → Data → "🍌 Muat Contoh Menu"** (ada konfirmasi karena menu lama akan diganti).
+> 💡 Untuk mengisi **contoh menu (55 varian, 4 kategori)** pertama kali: buka aplikasi → **Pengaturan → Data → "🍌 Muat Contoh Menu"** (ada konfirmasi karena menu lama akan diganti).
 
 ## Langkah 2 — Hubungkan Aplikasi ke Backend
 
@@ -78,7 +78,7 @@ Di aplikasi: **Pengaturan → Koneksi Spreadsheet** → tempel URL `/exec` → *
 cd pisang-madu-queena
 git init
 git add .
-git commit -m "Aplikasi kasir PISANG MADU QUEENA"
+git commit -m "Aplikasi kasir Kedai Pisang Queena"
 git branch -M main
 git remote add origin https://github.com/NAMA-ANDA/pisang-madu-queena.git
 git push -u origin main
@@ -129,7 +129,7 @@ Struk dicetak lengkap: **logo toko di tengah atas** (di-embed di aplikasi, hitam
 
 ```
         [ LOGO TOKO ]
-     PISANG MADU QUEENA      ← dari Data Toko
+     Kedai Pisang Queena      ← dari Data Toko
    Candirenggo, Singosari - Malang
       Telp. 0819-4534-8703
 --------------------------------
@@ -224,7 +224,7 @@ pisang-madu-queena/
 - **Tahan banting saat server lambat**: Apps Script sering *cold start* 20-40 detik. Aplikasi kini **tidak pernah memblokir layar**: data cache tampil instan, overlay auto-hilang setelah 8 detik, dan bila gagal muncul banner + **retry otomatis di background** (4s/12s/30s) — begitu server 'panas', data langsung termuat tanpa perlu buka ulang.
 - **Auto-sync realtime**: selama aplikasi terbuka (tab aktif), data otomatis ditarik dari spreadsheet setiap ±30 detik — menu/kategori/setting/riwayat yang diubah dari HP lain atau langsung di spreadsheet langsung terlihat tanpa perlu buka-tutup aplikasi. Transaksi antrian juga otomatis terkirim. Tombol **🔄 Sinkronkan Antrian** tetap tersedia untuk sinkron manual instan.
 - **Ganti harga / tambah menu** langsung dari aplikasi: menu **🍌 Menu** — perubahan langsung masuk spreadsheet (bukan cuma di HP).
-- **Upgrade dari versi lama**: contoh menu sekarang berisi 39 varian pisang (Goreng/Bakar/Katsu) tanpa kategori Minuman. Jika spreadsheet Anda masih berisi menu contoh lama, buka **Pengaturan → "🍌 Muat Contoh Menu"** untuk mengganti dengan daftar baru, atau hapus manual via tab Menu.
+- **Upgrade dari versi lama**: contoh menu sekarang berisi 55 varian pisang (Goreng/Bakar/Katsu) tanpa kategori Minuman. Jika spreadsheet Anda masih berisi menu contoh lama, buka **Pengaturan → "🍌 Muat Contoh Menu"** untuk mengganti dengan daftar baru, atau hapus manual via tab Menu.
 - **Token**: jangan gunakan token yang sama dengan password penting; token ini cukup untuk mencegah orang asing menulis ke spreadsheet Anda.
 
 Selamat berjualan! 🍯🍌

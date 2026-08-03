@@ -59,308 +59,67 @@ const DEMO_CATS = [
   { id: 'k1', nama: 'Pisang Goreng', emoji: '🍌', urutan: 1 },
   { id: 'k2', nama: 'Pisang Bakar',  emoji: '🔥', urutan: 2 },
   { id: 'k3', nama: 'Pisang Katsu',  emoji: '🍢', urutan: 3 },
+  { id: 'k4', nama: 'Lumpia Pisang', emoji: '🥟', urutan: 4 },
 ];
 
 /* [ID, NAMA, HARGA, KATEGORI, EMOJI] — sesuai foto menu asli (39 varian) */
 const DEMO_MENU_FULL = [
-  ['m01', 'Pisang Goreng Original',         10000, 'Pisang Goreng', '🍌'],
-  ['m02', 'Pisang Goreng Madu',             11000, 'Pisang Goreng', '🍯'],
-  ['m03', 'Pisang Goreng Gula Palm',        11000, 'Pisang Goreng', '🍬'],
-  ['m04', 'Pisang Goreng Keju',             12000, 'Pisang Goreng', '🧀'],
-  ['m05', 'Pisang Goreng Coklat',           12000, 'Pisang Goreng', '🍫'],
-  ['m06', 'Pisang Goreng Coklat Keju',      13000, 'Pisang Goreng', '🍫🧀'],
-  ['m07', 'Pisang Goreng Strawberry',       12000, 'Pisang Goreng', '🍓'],
-  ['m08', 'Pisang Goreng Tiramisu',         12000, 'Pisang Goreng', '🍰'],
-  ['m09', 'Pisang Goreng Greentea',         12000, 'Pisang Goreng', '🍵'],
-  ['m10', 'Pisang Goreng Capucino',         12000, 'Pisang Goreng', '☕'],
-  ['m11', 'Pisang Goreng Crumble Oreo',     14000, 'Pisang Goreng', '🍪'],
-  ['m12', 'Pisang Goreng Crumble Matcha',   14000, 'Pisang Goreng', '🍵'],
-  ['m13', 'Pisang Goreng Crumble Redvelvet', 14000, 'Pisang Goreng', '🧁'],
-  ['m14', 'Pisang Bakar Susu',              12000, 'Pisang Bakar', '🥛'],
-  ['m15', 'Pisang Bakar Gula Palm',         12000, 'Pisang Bakar', '🍬'],
-  ['m16', 'Pisang Bakar Keju',              13000, 'Pisang Bakar', '🧀'],
-  ['m17', 'Pisang Bakar Coklat',            13000, 'Pisang Bakar', '🍫'],
-  ['m18', 'Pisang Bakar Coklat Keju',       14000, 'Pisang Bakar', '🍫🧀'],
-  ['m19', 'Pisang Bakar Strawberry',        13000, 'Pisang Bakar', '🍓'],
-  ['m20', 'Pisang Bakar Tiramisu',          13000, 'Pisang Bakar', '🍰'],
-  ['m21', 'Pisang Bakar Greentea',          13000, 'Pisang Bakar', '🍵'],
-  ['m22', 'Pisang Bakar Capucino',          13000, 'Pisang Bakar', '☕'],
-  ['m23', 'Pisang Bakar Crumble Oreo',      15000, 'Pisang Bakar', '🍪'],
-  ['m24', 'Pisang Bakar Crumble Matcha',    15000, 'Pisang Bakar', '🍵'],
-  ['m25', 'Pisang Bakar Crumble Redvelvet', 15000, 'Pisang Bakar', '🧁'],
-  ['m26', 'Pisang Katsu Original',          12000, 'Pisang Katsu', '🍌'],
-  ['m27', 'Pisang Katsu Saus Vanila',       13000, 'Pisang Katsu', '🍦'],
-  ['m28', 'Pisang Katsu Saus Coklat',       13000, 'Pisang Katsu', '🍫'],
-  ['m29', 'Pisang Katsu Saus Karamel',      13000, 'Pisang Katsu', '🍮'],
-  ['m30', 'Pisang Katsu Saus Strawberry',   13000, 'Pisang Katsu', '🍓'],
-  ['m31', 'Pisang Katsu Susu',              13000, 'Pisang Katsu', '🥛'],
-  ['m32', 'Pisang Katsu Keju',              14000, 'Pisang Katsu', '🧀'],
-  ['m33', 'Pisang Katsu Coklat Keju',       15000, 'Pisang Katsu', '🍫🧀'],
-  ['m34', 'Pisang Katsu Tiramisu',          15000, 'Pisang Katsu', '🍰'],
-  ['m35', 'Pisang Katsu Greentea',          15000, 'Pisang Katsu', '🍵'],
-  ['m36', 'Pisang Katsu Capucino',          15000, 'Pisang Katsu', '☕'],
-  ['m37', 'Pisang Katsu Crumble Oreo',      16000, 'Pisang Katsu', '🍪'],
-  ['m38', 'Pisang Katsu Crumble Matcha',    16000, 'Pisang Katsu', '🍵'],
-  ['m39', 'Pisang Katsu Crumble Redvelvet', 16000, 'Pisang Katsu', '🧁'],
+  ['m01', 'Pisang Goreng Madu', 12000, 'Pisang Goreng', '🍯'],
+  ['m02', 'Pisang Goreng Original', 11000, 'Pisang Goreng', '🍌'],
+  ['m03', 'Pisang Goreng Coklat', 11000, 'Pisang Goreng', '🍫'],
+  ['m04', 'Pisang Goreng Keju', 11000, 'Pisang Goreng', '🧀'],
+  ['m05', 'Pisang Goreng Coklat Keju', 11000, 'Pisang Goreng', '🍫🧀'],
+  ['m06', 'Pisang Goreng Oreo', 11000, 'Pisang Goreng', '🍪'],
+  ['m07', 'Pisang Goreng Gula Aren', 11000, 'Pisang Goreng', '🍯'],
+  ['m08', 'Pisang Goreng Tiramisu', 11000, 'Pisang Goreng', '🍰'],
+  ['m09', 'Pisang Goreng Matcha', 11000, 'Pisang Goreng', '🍵'],
+  ['m10', 'Pisang Goreng Redvelvet', 11000, 'Pisang Goreng', '🧁'],
+  ['m11', 'Pisang Goreng Vanila', 11000, 'Pisang Goreng', '🍦'],
+  ['m12', 'Pisang Goreng Strawberry', 11000, 'Pisang Goreng', '🍓'],
+  ['m13', 'Pisang Goreng Cappucino', 11000, 'Pisang Goreng', '☕'],
+  ['m14', 'Pisang Goreng Blueberry', 11000, 'Pisang Goreng', '🫐'],
+  ['m15', 'Pisang Goreng Taro', 11000, 'Pisang Goreng', '🍠'],
+  ['m16', 'Pisang Katsu Original', 13000, 'Pisang Katsu', '🍢'],
+  ['m17', 'Pisang Katsu Susu', 13000, 'Pisang Katsu', '🥛'],
+  ['m18', 'Pisang Katsu Karamel', 13000, 'Pisang Katsu', '🍮'],
+  ['m19', 'Pisang Katsu Coklat', 13000, 'Pisang Katsu', '🍫'],
+  ['m20', 'Pisang Katsu Keju', 13000, 'Pisang Katsu', '🧀'],
+  ['m21', 'Pisang Katsu Coklat Keju', 13000, 'Pisang Katsu', '🍫🧀'],
+  ['m22', 'Pisang Katsu Oreo', 13000, 'Pisang Katsu', '🍪'],
+  ['m23', 'Pisang Katsu Tiramisu', 13000, 'Pisang Katsu', '🍰'],
+  ['m24', 'Pisang Katsu Matcha', 13000, 'Pisang Katsu', '🍵'],
+  ['m25', 'Pisang Katsu Redvelvet', 13000, 'Pisang Katsu', '🧁'],
+  ['m26', 'Pisang Katsu Vanila', 13000, 'Pisang Katsu', '🍦'],
+  ['m27', 'Pisang Katsu Strawberry', 13000, 'Pisang Katsu', '🍓'],
+  ['m28', 'Pisang Katsu Cappucino', 13000, 'Pisang Katsu', '☕'],
+  ['m29', 'Pisang Katsu Blueberry', 13000, 'Pisang Katsu', '🫐'],
+  ['m30', 'Pisang Katsu Taro', 13000, 'Pisang Katsu', '🍠'],
+  ['m31', 'Pisang Bakar Original', 11000, 'Pisang Bakar', '🍌'],
+  ['m32', 'Pisang Bakar Karamel', 11000, 'Pisang Bakar', '🍮'],
+  ['m33', 'Pisang Bakar Coklat', 11000, 'Pisang Bakar', '🍫'],
+  ['m34', 'Pisang Bakar Keju', 11000, 'Pisang Bakar', '🧀'],
+  ['m35', 'Pisang Bakar Coklat Keju', 11000, 'Pisang Bakar', '🍫🧀'],
+  ['m36', 'Pisang Bakar Oreo', 11000, 'Pisang Bakar', '🍪'],
+  ['m37', 'Pisang Bakar Gula Aren', 11000, 'Pisang Bakar', '🍯'],
+  ['m38', 'Pisang Bakar Tiramisu', 11000, 'Pisang Bakar', '🍰'],
+  ['m39', 'Pisang Bakar Matcha', 11000, 'Pisang Bakar', '🍵'],
+  ['m40', 'Pisang Bakar Redvelvet', 11000, 'Pisang Bakar', '🧁'],
+  ['m41', 'Pisang Bakar Vanila', 11000, 'Pisang Bakar', '🍦'],
+  ['m42', 'Pisang Bakar Strawberry', 11000, 'Pisang Bakar', '🍓'],
+  ['m43', 'Pisang Bakar Blueberry', 11000, 'Pisang Bakar', '🫐'],
+  ['m44', 'Pisang Bakar Taro', 11000, 'Pisang Bakar', '🍠'],
+  ['m45', 'Lumpia Pisang Original', 12000, 'Lumpia Pisang', '🥟'],
+  ['m46', 'Lumpia Pisang Karamel', 12000, 'Lumpia Pisang', '🍮'],
+  ['m47', 'Lumpia Pisang Coklat', 12000, 'Lumpia Pisang', '🍫'],
+  ['m48', 'Lumpia Pisang Keju', 12000, 'Lumpia Pisang', '🧀'],
+  ['m49', 'Lumpia Pisang Coklat Keju', 12000, 'Lumpia Pisang', '🍫🧀'],
+  ['m50', 'Lumpia Pisang Tiramisu', 12000, 'Lumpia Pisang', '🍰'],
+  ['m51', 'Lumpia Pisang Matcha', 12000, 'Lumpia Pisang', '🍵'],
+  ['m52', 'Lumpia Pisang Vanila', 12000, 'Lumpia Pisang', '🍦'],
+  ['m53', 'Lumpia Pisang Strawberry', 12000, 'Lumpia Pisang', '🍓'],
+  ['m54', 'Lumpia Pisang Blueberry', 12000, 'Lumpia Pisang', '🫐'],
+  ['m55', 'Lumpia Pisang Taro', 12000, 'Lumpia Pisang', '🍠'],
 ].map(r => ({ id: r[0], nama: r[1], harga: r[2], kategori: r[3], emoji: r[4], aktif: true, foto: '' }));
-
-const DEMO_SETTINGS = {
-  namaToko: 'PISANG MADU QUEENA',
-  alamat: 'Candirenggo, Singosari - Malang',
-  telepon: '0819-4534-8703',
-  footer: 'Terima kasih! Sampai jumpa lagi.',
-};
-
-/* ================= STATE ================= */
-const State = {
-  menu: [],
-  categories: DEMO_CATS.slice(),
-  settings: Object.assign({}, DEMO_SETTINGS),
-  cart: new Map(),
-  cash: 0,
-  sales: [],
-  editingId: null,      // id menu yang sedang diedit
-  editingCatId: null,   // id kategori yang sedang diedit
-  currentSale: null,
-  currentFoto: '',      // foto yang sedang dipilih di form menu
-};
-
-let searchQ = '';
-let catQ = 'Semua';
-let menuCatQ = 'Semua';   // filter kategori di tab kelola menu
-let menuSearchQ = '';     // pencarian di tab kelola menu
-
-/* ================= LOCAL STORAGE ================= */
-const LS = {
-  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
-  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
-  del(k) { try { localStorage.removeItem(k); } catch (e) {} },
-};
-
-/* ================= ANTRIAN TRANSAKSI LOKAL ================= */
-const Pending = {
-  all() { return LS.get(CONFIG.PENDING_KEY, []); },
-  add(s) { const a = this.all(); a.unshift(s); LS.set(CONFIG.PENDING_KEY, a); },
-  remove(no) { LS.set(CONFIG.PENDING_KEY, this.all().filter(x => x.no !== no)); },
-  unsavedCount() { return this.all().filter(x => !x.saved).length; },
-};
-
-/* ================= LAPISAN DATA (GAS / demo) ================= */
-const Data = {
-  isDemo() { return !String(CONFIG.GAS_URL || '').trim(); },
-
-  /* Data terakhir yang berhasil di-fetch (untuk tampil instan) */
-  getCachedAll() {
-    if (this.isDemo()) return null;
-    const menu = LS.get('pq_menu_cache', null);
-    const categories = LS.get('pq_cats_cache', null);
-    const settings = LS.get('pq_settings_cache', null);
-    if (!menu || !categories || !settings) return null;
-    return { menu, categories, settings };
-  },
-
-  /* Tarik SEMUA data dalam 1 panggilan (getAll) — jauh lebih cepat.
-     Fallback: panggil paralel bila backend lama belum punya getAll. */
-  async fetchAll() {
-    if (this.isDemo()) {
-      return {
-        settings: await this.getSettings(),
-        categories: await this.getCategories(),
-        menu: await this.getMenu(),
-        sales: null,
-      };
-    }
-    try {
-      const r = await Api.getAll();
-      LS.set('pq_menu_cache', r.menu);
-      LS.set('pq_cats_cache', r.categories);
-      LS.set('pq_settings_cache', r.settings);
-      return { settings: r.settings, categories: r.categories, menu: r.menu, sales: r.sales };
-    } catch (e) {
-      const [settings, categories, menu] = await Promise.all([
-        Api.getSettings().then(r => r.settings).catch(() => null),
-        Api.getCategories().then(r => r.categories).catch(() => null),
-        Api.getMenu().then(r => r.menu).catch(() => null),
-      ]);
-      if (!menu) throw e;
-      LS.set('pq_menu_cache', menu);
-      if (categories) LS.set('pq_cats_cache', categories);
-      if (settings) LS.set('pq_settings_cache', settings);
-      return { settings, categories, menu, sales: null };
-    }
-  },
-
-  /* ---------- MENU ---------- */
-  async getMenu() {
-    if (this.isDemo()) return LS.get('pq_demo_menu', DEMO_MENU_FULL);
-    try {
-      const r = await Api.getMenu();
-      LS.set('pq_menu_cache', r.menu);
-      return r.menu;
-    } catch (e) {
-      const c = LS.get('pq_menu_cache', null);
-      if (c) { toast('Server tidak terjangkau — memakai data tersimpan', 'warn'); return c; }
-      throw e;
-    }
-  },
-
-  async saveMenu(item) {
-    if (this.isDemo()) {
-      const it = Object.assign({}, item);
-      // Di mode demo tidak ada backend Drive: foto base64 disimpan
-      // langsung sebagai data URL di item.foto (tidak hilang).
-      if (it.fotoData) {
-        it.foto = 'data:image/jpeg;base64,' + it.fotoData;
-      }
-      delete it.fotoData;
-      const list = LS.get('pq_demo_menu', DEMO_MENU_FULL);
-      const i = list.findIndex(x => x.id === it.id);
-      if (i >= 0) list[i] = it; else list.push(it);
-      LS.set('pq_demo_menu', list);
-      return it;
-    }
-    const r = await Api.saveMenu(item);
-    this.refreshMenuCache();
-    return r.item;
-  },
-
-  async deleteMenu(id) {
-    if (this.isDemo()) {
-      LS.set('pq_demo_menu', LS.get('pq_demo_menu', DEMO_MENU_FULL).filter(x => x.id !== id));
-      return;
-    }
-    await Api.deleteMenu(id);
-    this.refreshMenuCache();
-  },
-
-  async refreshMenuCache() {
-    try { const r = await Api.getMenu(); LS.set('pq_menu_cache', r.menu); } catch (e) {}
-  },
-
-  /* ---------- KATEGORI ---------- */
-  async getCategories() {
-    if (this.isDemo()) return LS.get('pq_demo_cats', DEMO_CATS);
-    try {
-      const r = await Api.getCategories();
-      LS.set('pq_cats_cache', r.categories);
-      return r.categories;
-    } catch (e) {
-      return LS.get('pq_cats_cache', DEMO_CATS);
-    }
-  },
-
-  async saveCategory(cat) {
-    if (this.isDemo()) {
-      const list = LS.get('pq_demo_cats', DEMO_CATS);
-      const i = list.findIndex(x => x.id === cat.id);
-      if (i >= 0) {
-        const oldNama = list[i].nama;
-        list[i] = cat;
-        // rename kategori di menu
-        if (oldNama !== cat.nama) {
-          const menu = LS.get('pq_demo_menu', DEMO_MENU_FULL);
-          menu.forEach(m => { if (m.kategori === oldNama) m.kategori = cat.nama; });
-          LS.set('pq_demo_menu', menu);
-        }
-      } else {
-        list.push(cat);
-      }
-      LS.set('pq_demo_cats', list);
-      return cat;
-    }
-    const r = await Api.saveCategory(cat);
-    this.refreshMenuCache();
-    return r.category;
-  },
-
-  async deleteCategory(id) {
-    if (this.isDemo()) {
-      const list = LS.get('pq_demo_cats', DEMO_CATS);
-      const c = list.find(x => x.id === id);
-      LS.set('pq_demo_cats', list.filter(x => x.id !== id));
-      if (c) {
-        const menu = LS.get('pq_demo_menu', DEMO_MENU_FULL);
-        menu.forEach(m => { if (m.kategori === c.nama) m.kategori = 'Umum'; });
-        LS.set('pq_demo_menu', menu);
-      }
-      return;
-    }
-    await Api.deleteCategory(id);
-    this.refreshMenuCache();
-  },
-
-  /* ---------- SETTINGS ---------- */
-  async getSettings() {
-    if (this.isDemo()) return Object.assign({}, DEMO_SETTINGS, LS.get('pq_demo_settings', {}));
-    try {
-      const r = await Api.getSettings();
-      LS.set('pq_settings_cache', r.settings);
-      return r.settings;
-    } catch (e) {
-      const c = LS.get('pq_settings_cache', null);
-      if (c) return c;
-      throw e;
-    }
-  },
-
-  async saveSettings(s) {
-    if (this.isDemo()) {
-      LS.set('pq_demo_settings', Object.assign({}, LS.get('pq_demo_settings', {}), s));
-      return s;
-    }
-    await Api.saveSettings(s);
-    LS.set('pq_settings_cache', s);
-    return s;
-  },
-
-  /* ---------- TRANSAKSI ---------- */
-  async saveSale(sale) {
-    // Nomor lokal per hari: L001, L002, dst (L = belum sync ke server)
-    const localNo = () => {
-      const today = sale.tanggal;
-      const count = Pending.all().filter(p => p.tanggal === today).length + 1;
-      return 'L' + String(count).padStart(3, '0');
-    };
-    if (this.isDemo()) {
-      const s = Object.assign({}, sale, { no: localNo(), ts: Date.now(), saved: true });
-      Pending.add(s);
-      return { saved: true, sale: s };
-    }
-    try {
-      const r = await Api.saveSale(sale);
-      const s = Object.assign({}, sale, { no: r.sale.no, ts: Date.now(), saved: true });
-      return { saved: true, sale: s };
-    } catch (e) {
-      const s = Object.assign({}, sale, { no: localNo(), ts: Date.now(), saved: false });
-      Pending.add(s);
-      return { saved: false, sale: s, error: e.message };
-    }
-  },
-
-  async getSales() {
-    if (this.isDemo()) return Pending.all();
-    const r = await Api.getSales(200);
-    return r.sales.map(s => Object.assign({}, s, { saved: true, ts: Date.parse(s.tanggal + 'T' + (s.jam || '00:00') + ':00') || 0 }));
-  },
-
-  async syncPending() {
-    if (this.isDemo()) return 0;
-    const list = Pending.all();
-    let ok = 0;
-    for (const p of list) {
-      if (p.saved) continue;
-      try {
-        await Api.saveSale({
-          tanggal: p.tanggal, jam: p.jam, items: p.items,
-          diskon: 0, metode: p.metode, bayar: p.bayar,
-        });
-        Pending.remove(p.no);
-        ok++;
-      } catch (e) { /* biarkan di antrian */ }
-    }
-    return ok;
-  },
-};
 
 /* ================= LEBAR PRINTER ================= */
 function applyPrinterWidth() {

@@ -1,7 +1,7 @@
 {
-  "name": "PISANG MADU QUEENA - Kasir",
-  "short_name": "Pisang Madu",
-  "description": "Aplikasi kasir online & cetak struk bluetooth untuk PISANG MADU QUEENA",
+  "name": "Kedai Pisang Queena - Kasir",
+  "short_name": "Pisang Queena",
+  "description": "Aplikasi kasir online & cetak struk bluetooth untuk Kedai Pisang Queena",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

@@ -14,7 +14,7 @@ var CONFIG = {
   // nilai TOKEN di sheet SETTINGS spreadsheet Anda).
   TOKEN: '',
 
-  APP_NAME: 'PISANG MADU QUEENA',
+  APP_NAME: 'Kedai Pisang Queena',
   PRINTER_CHARS: 32, // lebar struk 58mm font A (80mm: 48)
   PRINTER_DOTS: 384, // lebar titik cetak 58mm (80mm: 576)
 
