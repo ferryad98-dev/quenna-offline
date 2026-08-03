@@ -1,5 +1,5 @@
 /* ============================================================
-   KEDAI PISANG QUEENA — Logika Utama Aplikasi Kasir
+   PISANG MADU QUEENA — Logika Utama Aplikasi Kasir
    v1.1: + kelola kategori, + foto menu asli (Drive / demo)
    ============================================================ */
 'use strict';
@@ -120,6 +120,264 @@ const DEMO_MENU_FULL = [
   ['m54', 'Lumpia Pisang Blueberry', 12000, 'Lumpia Pisang', '🫐'],
   ['m55', 'Lumpia Pisang Taro', 12000, 'Lumpia Pisang', '🍠'],
 ].map(r => ({ id: r[0], nama: r[1], harga: r[2], kategori: r[3], emoji: r[4], aktif: true, foto: '' }));
+
+const DEMO_SETTINGS = {
+  namaToko: 'Kedai Pisang Queena',
+  alamat: 'Candirenggo, Singosari - Malang',
+  telepon: '0819-4534-8703',
+  footer: 'Terima kasih! Sampai jumpa lagi.',
+};
+
+/* ================= STATE ================= */
+const State = {
+  menu: [],
+  categories: DEMO_CATS.slice(),
+  settings: Object.assign({}, DEMO_SETTINGS),
+  cart: new Map(),
+  cash: 0,
+  sales: [],
+  editingId: null,      // id menu yang sedang diedit
+  editingCatId: null,   // id kategori yang sedang diedit
+  currentSale: null,
+  currentFoto: '',      // foto yang sedang dipilih di form menu
+};
+
+let searchQ = '';
+let catQ = 'Semua';
+let menuCatQ = 'Semua';   // filter kategori di tab kelola menu
+let menuSearchQ = '';     // pencarian di tab kelola menu
+
+/* ================= LOCAL STORAGE ================= */
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+  del(k) { try { localStorage.removeItem(k); } catch (e) {} },
+};
+
+/* ================= ANTRIAN TRANSAKSI LOKAL ================= */
+const Pending = {
+  all() { return LS.get(CONFIG.PENDING_KEY, []); },
+  add(s) { const a = this.all(); a.unshift(s); LS.set(CONFIG.PENDING_KEY, a); },
+  remove(no) { LS.set(CONFIG.PENDING_KEY, this.all().filter(x => x.no !== no)); },
+  unsavedCount() { return this.all().filter(x => !x.saved).length; },
+};
+
+/* ================= LAPISAN DATA (GAS / demo) ================= */
+const Data = {
+  isDemo() { return !String(CONFIG.GAS_URL || '').trim(); },
+
+  /* Data terakhir yang berhasil di-fetch (untuk tampil instan) */
+  getCachedAll() {
+    if (this.isDemo()) return null;
+    const menu = LS.get('pq_menu_cache', null);
+    const categories = LS.get('pq_cats_cache', null);
+    const settings = LS.get('pq_settings_cache', null);
+    if (!menu || !categories || !settings) return null;
+    return { menu, categories, settings };
+  },
+
+  /* Tarik SEMUA data dalam 1 panggilan (getAll) — jauh lebih cepat.
+     Fallback: panggil paralel bila backend lama belum punya getAll. */
+  async fetchAll() {
+    if (this.isDemo()) {
+      return {
+        settings: await this.getSettings(),
+        categories: await this.getCategories(),
+        menu: await this.getMenu(),
+        sales: null,
+      };
+    }
+    try {
+      const r = await Api.getAll();
+      LS.set('pq_menu_cache', r.menu);
+      LS.set('pq_cats_cache', r.categories);
+      LS.set('pq_settings_cache', r.settings);
+      return { settings: r.settings, categories: r.categories, menu: r.menu, sales: r.sales };
+    } catch (e) {
+      const [settings, categories, menu] = await Promise.all([
+        Api.getSettings().then(r => r.settings).catch(() => null),
+        Api.getCategories().then(r => r.categories).catch(() => null),
+        Api.getMenu().then(r => r.menu).catch(() => null),
+      ]);
+      if (!menu) throw e;
+      LS.set('pq_menu_cache', menu);
+      if (categories) LS.set('pq_cats_cache', categories);
+      if (settings) LS.set('pq_settings_cache', settings);
+      return { settings, categories, menu, sales: null };
+    }
+  },
+
+  /* ---------- MENU ---------- */
+  async getMenu() {
+    if (this.isDemo()) return LS.get('pq_demo_menu', DEMO_MENU_FULL);
+    try {
+      const r = await Api.getMenu();
+      LS.set('pq_menu_cache', r.menu);
+      return r.menu;
+    } catch (e) {
+      const c = LS.get('pq_menu_cache', null);
+      if (c) { toast('Server tidak terjangkau — memakai data tersimpan', 'warn'); return c; }
+      throw e;
+    }
+  },
+
+  async saveMenu(item) {
+    if (this.isDemo()) {
+      const it = Object.assign({}, item);
+      // Di mode demo tidak ada backend Drive: foto base64 disimpan
+      // langsung sebagai data URL di item.foto (tidak hilang).
+      if (it.fotoData) {
+        it.foto = 'data:image/jpeg;base64,' + it.fotoData;
+      }
+      delete it.fotoData;
+      const list = LS.get('pq_demo_menu', DEMO_MENU_FULL);
+      const i = list.findIndex(x => x.id === it.id);
+      if (i >= 0) list[i] = it; else list.push(it);
+      LS.set('pq_demo_menu', list);
+      return it;
+    }
+    const r = await Api.saveMenu(item);
+    this.refreshMenuCache();
+    return r.item;
+  },
+
+  async deleteMenu(id) {
+    if (this.isDemo()) {
+      LS.set('pq_demo_menu', LS.get('pq_demo_menu', DEMO_MENU_FULL).filter(x => x.id !== id));
+      return;
+    }
+    await Api.deleteMenu(id);
+    this.refreshMenuCache();
+  },
+
+  async refreshMenuCache() {
+    try { const r = await Api.getMenu(); LS.set('pq_menu_cache', r.menu); } catch (e) {}
+  },
+
+  /* ---------- KATEGORI ---------- */
+  async getCategories() {
+    if (this.isDemo()) return LS.get('pq_demo_cats', DEMO_CATS);
+    try {
+      const r = await Api.getCategories();
+      LS.set('pq_cats_cache', r.categories);
+      return r.categories;
+    } catch (e) {
+      return LS.get('pq_cats_cache', DEMO_CATS);
+    }
+  },
+
+  async saveCategory(cat) {
+    if (this.isDemo()) {
+      const list = LS.get('pq_demo_cats', DEMO_CATS);
+      const i = list.findIndex(x => x.id === cat.id);
+      if (i >= 0) {
+        const oldNama = list[i].nama;
+        list[i] = cat;
+        // rename kategori di menu
+        if (oldNama !== cat.nama) {
+          const menu = LS.get('pq_demo_menu', DEMO_MENU_FULL);
+          menu.forEach(m => { if (m.kategori === oldNama) m.kategori = cat.nama; });
+          LS.set('pq_demo_menu', menu);
+        }
+      } else {
+        list.push(cat);
+      }
+      LS.set('pq_demo_cats', list);
+      return cat;
+    }
+    const r = await Api.saveCategory(cat);
+    this.refreshMenuCache();
+    return r.category;
+  },
+
+  async deleteCategory(id) {
+    if (this.isDemo()) {
+      const list = LS.get('pq_demo_cats', DEMO_CATS);
+      const c = list.find(x => x.id === id);
+      LS.set('pq_demo_cats', list.filter(x => x.id !== id));
+      if (c) {
+        const menu = LS.get('pq_demo_menu', DEMO_MENU_FULL);
+        menu.forEach(m => { if (m.kategori === c.nama) m.kategori = 'Umum'; });
+        LS.set('pq_demo_menu', menu);
+      }
+      return;
+    }
+    await Api.deleteCategory(id);
+    this.refreshMenuCache();
+  },
+
+  /* ---------- SETTINGS ---------- */
+  async getSettings() {
+    if (this.isDemo()) return Object.assign({}, DEMO_SETTINGS, LS.get('pq_demo_settings', {}));
+    try {
+      const r = await Api.getSettings();
+      LS.set('pq_settings_cache', r.settings);
+      return r.settings;
+    } catch (e) {
+      const c = LS.get('pq_settings_cache', null);
+      if (c) return c;
+      throw e;
+    }
+  },
+
+  async saveSettings(s) {
+    if (this.isDemo()) {
+      LS.set('pq_demo_settings', Object.assign({}, LS.get('pq_demo_settings', {}), s));
+      return s;
+    }
+    await Api.saveSettings(s);
+    LS.set('pq_settings_cache', s);
+    return s;
+  },
+
+  /* ---------- TRANSAKSI ---------- */
+  async saveSale(sale) {
+    // Nomor lokal per hari: L001, L002, dst (L = belum sync ke server)
+    const localNo = () => {
+      const today = sale.tanggal;
+      const count = Pending.all().filter(p => p.tanggal === today).length + 1;
+      return 'L' + String(count).padStart(3, '0');
+    };
+    if (this.isDemo()) {
+      const s = Object.assign({}, sale, { no: localNo(), ts: Date.now(), saved: true });
+      Pending.add(s);
+      return { saved: true, sale: s };
+    }
+    try {
+      const r = await Api.saveSale(sale);
+      const s = Object.assign({}, sale, { no: r.sale.no, ts: Date.now(), saved: true });
+      return { saved: true, sale: s };
+    } catch (e) {
+      const s = Object.assign({}, sale, { no: localNo(), ts: Date.now(), saved: false });
+      Pending.add(s);
+      return { saved: false, sale: s, error: e.message };
+    }
+  },
+
+  async getSales() {
+    if (this.isDemo()) return Pending.all();
+    const r = await Api.getSales(200);
+    return r.sales.map(s => Object.assign({}, s, { saved: true, ts: Date.parse(s.tanggal + 'T' + (s.jam || '00:00') + ':00') || 0 }));
+  },
+
+  async syncPending() {
+    if (this.isDemo()) return 0;
+    const list = Pending.all();
+    let ok = 0;
+    for (const p of list) {
+      if (p.saved) continue;
+      try {
+        await Api.saveSale({
+          tanggal: p.tanggal, jam: p.jam, items: p.items,
+          diskon: 0, metode: p.metode, bayar: p.bayar,
+        });
+        Pending.remove(p.no);
+        ok++;
+      } catch (e) { /* biarkan di antrian */ }
+    }
+    return ok;
+  },
+};
 
 /* ================= LEBAR PRINTER ================= */
 function applyPrinterWidth() {
