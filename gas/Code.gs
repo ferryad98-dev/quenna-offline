@@ -316,7 +316,7 @@ function saveSale_(ss, sale) {
   }
   const sh = sheet_(ss, 'TRANSAKSI', [
     'NO', 'TANGGAL', 'JAM', 'ITEMS', 'JUMLAH_ITEM',
-    'SUBTOTAL', 'DISKON', 'TOTAL', 'METODE', 'BAYAR', 'KEMBALI', 'KASIR',
+    'SUBTOTAL', 'DISKON', 'TOTAL', 'METODE', 'BAYAR', 'KEMBALI', 'KASIR', 'NAMA_PEMBELI',
   ]);
 
   const items = sale.items.map(it => ({
@@ -356,6 +356,7 @@ function saveSale_(ss, sale) {
     items.reduce((s, it) => s + it.qty, 0),
     subtotal, diskon, total, metode, bayar, kembali,
     String(sale.kasir || 'Kasir'),
+    String(sale.pembeli || ''),
   ]);
 
   return { ok: true, sale: { no, tanggal, jam, total, kembali } };
@@ -364,7 +365,7 @@ function saveSale_(ss, sale) {
 function readSales_(ss, limit) {
   const sh = sheet_(ss, 'TRANSAKSI', [
     'NO', 'TANGGAL', 'JAM', 'ITEMS', 'JUMLAH_ITEM',
-    'SUBTOTAL', 'DISKON', 'TOTAL', 'METODE', 'BAYAR', 'KEMBALI', 'KASIR',
+    'SUBTOTAL', 'DISKON', 'TOTAL', 'METODE', 'BAYAR', 'KEMBALI', 'KASIR', 'NAMA_PEMBELI',
   ]);
   const tz = Session.getScriptTimeZone();
   // Google Sheets mengubah string tanggal/jam menjadi Date →
@@ -393,6 +394,7 @@ function readSales_(ss, limit) {
         bayar: Number(r[9]) || 0,
         kembali: Number(r[10]) || 0,
         kasir: String(r[11] || ''),
+        pembeli: r.length > 12 ? String(r[12] || '') : '',
       };
     });
 }
@@ -469,7 +471,7 @@ function setup_(ss, reset) {
   sheet_(ss, 'SETTINGS', ['KEY', 'VALUE']);
   sheet_(ss, 'TRANSAKSI', [
     'NO', 'TANGGAL', 'JAM', 'ITEMS', 'JUMLAH_ITEM',
-    'SUBTOTAL', 'DISKON', 'TOTAL', 'METODE', 'BAYAR', 'KEMBALI', 'KASIR',
+    'SUBTOTAL', 'DISKON', 'TOTAL', 'METODE', 'BAYAR', 'KEMBALI', 'KASIR', 'NAMA_PEMBELI',
   ]);
   const cSh = sheet_(ss, 'KATEGORI', CAT_HEADERS);
 

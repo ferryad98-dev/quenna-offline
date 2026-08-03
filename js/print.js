@@ -67,6 +67,8 @@ const Print = (() => {
     add(sep);
     kv('No', '#' + (sale.no || '-'));
     kv('Tgl', ((sale.tanggal || '') + '  ' + (sale.jam || '')).trim());
+    // Nama pembeli (opsional) — muncul di bawah tanggal
+    if (sale.pembeli) kv('Pembeli', truncate(sale.pembeli, W - 10));
     add(sep);
 
     const items = sale.items || [];

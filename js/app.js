@@ -411,10 +411,12 @@ const Cart = {
   remove(id) { State.cart.delete(id); renderCartBar(); renderCartItems(); },
   clear() {
     State.cart.clear();
-    // Reset input uang → transaksi baru selalu mulai dari nol
+    // Reset input uang & nama pembeli → transaksi baru mulai bersih
     State.cash = 0;
     const ci = $('#cashInput');
     if (ci) ci.value = '';
+    const bn = $('#buyerName');
+    if (bn) bn.value = '';
     renderCartBar(); renderCartItems();
   },
   list() { return Array.from(State.cart.values()); },
@@ -523,8 +525,10 @@ async function doPay() {
   const total = Cart.subtotal();
   const metode = 'Tunai';
   const bayar = Number(State.cash) || 0;
+  const pembeli = $('#buyerName').value.trim();
   const sale = {
     tanggal: nowDate(), jam: nowTime(),
+    pembeli,
     items, subtotal: total, diskon: 0, total,
     metode, bayar,
     kembali: Math.max(0, bayar - total),
@@ -705,7 +709,7 @@ function renderSales() {
        <div class="sc-left">
          <div class="sc-no">#${esc(s.no)}${s.saved ? '' : ' <span class="badge warn">ANTRE</span>'}</div>
          <div class="sc-time">${esc(s.tanggal || '')} ${esc(s.jam || '')} · ${esc(s.metode || 'Tunai')}</div>
-         <div class="sc-items">${(s.items || []).length} item</div>
+         <div class="sc-items">${(s.items || []).length} item${s.pembeli ? ' · 👤 ' + esc(s.pembeli) : ''}</div>
        </div>
        <div class="sc-right"><b>${fmtRp(s.total)}</b></div>
      </button>`

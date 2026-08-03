@@ -186,7 +186,7 @@
         <p class="hint">Transaksi belum tersimpan (server offline): <b id="pendingCount">0</b></p>
       </div>
 
-      <p class="version">KEDAI PISANG QUEENA v1.7.5 · PWA + Google Apps Script + Spreadsheet</p>
+      <p class="version">KEDAI PISANG QUEENA v1.7.6 · PWA + Google Apps Script + Spreadsheet</p>
     </section>
   </main>
 
@@ -235,6 +235,9 @@
         <input id="cashInput" type="number" inputmode="numeric" placeholder="0">
         <div class="sum-row change"><span>Kembalian</span><b id="changeVal">Rp 0</b></div>
       </div>
+
+      <label class="buyer-label">👤 Nama Pembeli <small>(opsional — tampil di struk)</small></label>
+      <input id="buyerName" type="text" placeholder="contoh: Bpk. Andi" autocomplete="off" maxlength="30">
 
       <button id="btnPay" class="btn btn-primary btn-block btn-lg" disabled>💳 Bayar & Cetak Struk</button>
     </div>
