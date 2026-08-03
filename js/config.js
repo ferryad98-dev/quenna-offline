@@ -7,9 +7,8 @@
    menu Pengaturan → Koneksi Spreadsheet → Simpan.
    ============================================================ */
 var CONFIG = {
-  // Contoh: 'https://script.google.com/macros/s/XXXX-YYYY/exec'
-  // Biarkan kosong = MODE DEMO (data hanya tersimpan di perangkat).
-  GAS_URL: '',
+  // URL Web App Google Apps Script (sudah terisi — backend PISANG MADU QUEENA)
+  GAS_URL: 'https://script.google.com/macros/s/AKfycby_6xj5BYYcvQoZ_9_lzwmVofcKtez3JsSkcoymE0ZPCCQGiScZH3a-vAq0UjK7fiXU-g/exec',
 
   // Token opsional untuk keamanan ringan (harus sama dengan
   // nilai TOKEN di sheet SETTINGS spreadsheet Anda).
