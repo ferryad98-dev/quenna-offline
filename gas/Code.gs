@@ -288,7 +288,7 @@ function readSettings_(ss) {
   };
 }
 
-/*function saveSettings_(ss, s) {
+function saveSettings_(ss, s) {
   if (!s) throw new Error('Data settings kosong');
   const set = (k, v) => {
     const sh = sheet_(ss, 'SETTINGS', ['KEY', 'VALUE']);
@@ -299,13 +299,15 @@ function readSettings_(ss) {
     else sh.appendRow([k, val]);
   };
   if (s.token !== undefined) set('TOKEN', s.token);
+  // Penting: kunci disimpan DENGAN underscore (NAMA_TOKO) agar cocok
+  // dengan pembacaan di readSettings_ (map.NAMA_TOKO).
+  const KEY_MAP = { namaToko: 'NAMA_TOKO', alamat: 'ALAMAT', telepon: 'TELEPON', footer: 'FOOTER' };
   ['namaToko', 'alamat', 'telepon', 'footer'].forEach(k => {
-    if (s[k] !== undefined) set(k.toUpperCase(), s[k]);
+    if (s[k] !== undefined) set(KEY_MAP[k], s[k]);
   });
-
-
   return { ok: true };
 }
+
 
 /* ============ TRANSAKSI ============ */
 function saveSale_(ss, sale) {

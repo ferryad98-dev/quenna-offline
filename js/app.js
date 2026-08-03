@@ -1131,7 +1131,7 @@ async function refreshAll(silent, showLoading) {
   $('#demoBanner').classList.toggle('hidden', !Data.isDemo());
   // Setting → Data: tombol yang tidak relevan disembunyikan sesuai mode
   $('#syncRow').style.display = Data.isDemo() ? 'none' : '';
-  $('#resetRow').style.display = Data.isDemo() ? '' : 'none';
+  $('#setupRow').style.display = Data.isDemo() ? '' : 'none';
   updateBrand();
   fillSettingsForm();
   renderAll();
@@ -1325,6 +1325,7 @@ function bindEvents() {
     }
   });
   $('#btnSync').addEventListener('click', syncNow);
+  $('#btnReloadData').addEventListener('click', () => refreshAll(false, true));
   $('#btnSetupMenu').addEventListener('click', setupSampleMenu);
   $('#btnResetDemo').addEventListener('click', resetDemo);
 

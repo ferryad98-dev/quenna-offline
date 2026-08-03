@@ -19,6 +19,11 @@ Aplikasi kasir berbasis **mobile web (PWA)** untuk usaha jualan online **PISANG 
 
 > 🔧 **Fix penting (v1.6.1)**: `saveSale_` di `Code.gs` sebelumnya error *"Cannot access 'tanggal' before initialization"* karena urutan deklarasi — akibatnya transaksi tidak bisa masuk spreadsheet. Sudah diperbaiki: `tanggal`/`jam` dideklarasikan sebelum dipakai. **WAJIB redeploy Code.gs** (Deploy → Manage deployments → New version) setelah mengganti file.
 
+
+> 🔧 **Fix penting (v1.6.2)**: `saveSettings_` di `Code.gs` menyimpan nama toko dengan kunci `NAMATOKO` (tanpa underscore) padahal pembacaan memakai `NAMA_TOKO` — akibatnya **edit nama toko tidak pernah tersimpan** dan selalu kembali ke default. Sudah diperbaiki (kunci konsisten `NAMA_TOKO`). Fungsi `saveSettings_` sebelumnya juga tidak sengaja terkomentar — sudah diaktifkan. **WAJIB redeploy Code.gs** setelah mengganti file.
+
+> 🔄 **Sinkron 2 arah**: edit langsung di spreadsheet (menu/kategori/transaksi/data toko) akan tampil di aplikasi dalam ±30 detik (auto-sync), atau langsung dengan tombol **📥 Muat Ulang Data** di Pengaturan → Data.
+
 ## Arsitektur
 
 ```
