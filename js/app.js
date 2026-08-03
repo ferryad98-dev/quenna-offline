@@ -448,7 +448,9 @@ function renderMenuGrid() {
   );
   const grid = $('#menuGrid');
   if (!list.length) {
-    grid.innerHTML = `<div class="empty">🍌 Tidak ada menu.<br>Tambahkan lewat menu <b>Menu</b> di bawah.</div>`;
+    grid.innerHTML = Data.isDemo()
+      ? `<div class="empty">🍌 Belum ada menu.<br>Tambahkan lewat menu <b>Menu</b> di bawah.</div>`
+      : `<div class="empty">⏳ Menu belum termuat.<br>Periksa koneksi server lalu tekan <b>🔄 Coba Lagi</b> di banner atas.</div>`;
     return;
   }
   grid.innerHTML = list.map(menuCardHtml).join('');
@@ -1024,6 +1026,65 @@ function hideSyncOverlay() {
   if (o) o.classList.add('hidden');
 }
 
+/* Tampilkan data hasil fetch ke UI (dipakai refreshAll & retry background) */
+function applyFreshData(fresh) {
+  if (!fresh) return;
+  if (fresh.settings) State.settings = fresh.settings;
+  if (fresh.categories) State.categories = fresh.categories;
+  if (fresh.menu) State.menu = fresh.menu;
+  mergeCategories();
+  setGasDot(Data.isDemo() ? 'demo' : 'ok');
+  if (fresh.sales) {
+    State.sales = mergeSales(fresh.sales, Pending.all());
+    renderSales();
+  }
+  updateBrand();
+  fillSettingsForm();
+  renderAll();
+  updatePendingBadge();
+  if (!Data.isDemo()) {
+    const bn = $('#serverBanner');
+    if (bn) bn.classList.add('hidden');
+  }
+}
+
+/* Tampilkan banner "server bermasalah" (data tersimpan tetap tampil) */
+function showServerBanner() {
+  const bn = $('#serverBanner');
+  if (!bn) return;
+  bn.classList.remove('hidden');
+  const msg = $('#serverBannerMsg');
+  if (msg) msg.textContent = Data.isDemo()
+    ? 'Mode demo — data tersimpan di perangkat ini.'
+    : 'Server lambat / tidak terjangkau. Menampilkan data tersimpan.';
+}
+
+/* ===== Retry background: GAS sering cold start 20-40 detik.
+   Alih-alih memblokir layar, kita coba ulang diam-diam beberapa kali;
+   begitu berhasil, data langsung diperbarui + banner hilang. ===== */
+let retryTimer = null;
+
+function scheduleServerRetry() {
+  if (Data.isDemo() || retryTimer) return;
+  const delays = [4000, 12000, 30000]; // coba lagi 4s, 12s, 30s
+  let i = 0;
+  const attempt = async () => {
+    if (i >= delays.length) { retryTimer = null; return; }
+    retryTimer = setTimeout(async () => {
+      i++;
+      try {
+        const fresh = await Data.fetchAll();
+        applyFreshData(fresh);
+        retryTimer = null;
+        toast('Terhubung kembali ke spreadsheet ✔', 'ok');
+      } catch (e) {
+        attempt(); // coba jadwal berikutnya
+      }
+    }, delays[i - 1]);
+  };
+  attempt();
+}
+
 async function refreshAll(silent, showLoading) {
   setGasDot('sync');
   if (showLoading) showSyncOverlay();
@@ -1040,40 +1101,28 @@ async function refreshAll(silent, showLoading) {
     renderAll();
   }
 
-  // 2) Tarik data terbaru: 1 panggilan getAll (atau paralel bila GAS lama)
+  // 2) Overlay tidak boleh memblokir lama: auto-hide setelah 8 detik
+  if (showLoading) {
+    setTimeout(() => hideSyncOverlay(), 8000);
+  }
+
+  // 3) Tarik data terbaru (fail cepat: maks ±20 detik per percobaan)
   let fetchOk = false;
   try {
     const fresh = await Data.fetchAll();
     fetchOk = true;
-    State.settings = fresh.settings;
-    State.categories = fresh.categories;
-    State.menu = fresh.menu;
-    mergeCategories();
-    setGasDot(Data.isDemo() ? 'demo' : 'ok');
+    applyFreshData(fresh);
     if (!silent && !Data.isDemo()) toast('Terhubung ke spreadsheet ✔', 'ok');
-    if (fresh.sales) {
-      State.sales = mergeSales(fresh.sales, Pending.all());
-      renderSales();
-    } else {
-      await loadSales();
-    }
   } catch (e) {
     setGasDot(Data.isDemo() ? 'demo' : 'bad');
     if (!silent) toast('Gagal hubungi server: ' + e.message, 'err');
-    // Tampilkan banner peringatan (data tersimpan tetap tampil)
-    const bn = $('#serverBanner');
-    if (bn) {
-      bn.classList.remove('hidden');
-      const msg = $('#serverBannerMsg');
-      if (msg) msg.textContent = Data.isDemo()
-        ? 'Mode demo — data tersimpan di perangkat ini.'
-        : 'Server lambat / tidak terjangkau. Menampilkan data tersimpan.';
-    }
+    showServerBanner();
+    scheduleServerRetry(); // coba lagi diam-diam — GAS butuh "panas"
   } finally {
     if (showLoading) hideSyncOverlay();
   }
 
-  // Sembunyikan banner hanya jika fetch berhasil (kecuali mode demo)
+  // Banner sembunyi hanya jika fetch berhasil (kecuali mode demo)
   if (fetchOk && !Data.isDemo()) {
     const bn = $('#serverBanner');
     if (bn) bn.classList.add('hidden');

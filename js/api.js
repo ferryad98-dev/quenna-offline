@@ -50,8 +50,8 @@ const Api = {
 
   async call(action, payload = {}, opts) {
     opts = opts || {};
-    const timeout = opts.timeout || 25000;       // batas tunggu tiap percobaan
-    const retries = opts.retries !== undefined ? opts.retries : 2;
+    const timeout = opts.timeout || 20000;
+    const retries = opts.retries !== undefined ? opts.retries : 0;
 
     if (!CONFIG.GAS_URL || !String(CONFIG.GAS_URL).trim()) {
       throw new Error('URL GAS belum diisi (mode demo)');
@@ -61,8 +61,7 @@ const Api = {
       Object.assign({ action }, payload, { token: CONFIG.TOKEN })
     );
 
-    // Daftar URL yang dicoba: URL aktif dulu, lalu URL bawaan sebagai
-    // cadangan otomatis (mengatasi URL tersimpan yang sudah basi).
+    // Daftar URL: URL aktif dulu, URL bawaan sebagai cadangan
     const urls = [CONFIG.GAS_URL];
     if (CONFIG_DEFAULT_GAS_URL && CONFIG_DEFAULT_GAS_URL !== CONFIG.GAS_URL) {
       urls.push(CONFIG_DEFAULT_GAS_URL);
@@ -75,26 +74,26 @@ const Api = {
           return await this.tryOnce(url, body, timeout);
         } catch (e) {
           lastErr = e;
-          await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
+          await new Promise(r => setTimeout(r, 400 * (attempt + 1)));
         }
       }
     }
     throw lastErr || new Error('Server tidak terjangkau. Cek koneksi internet / URL GAS.');
   },
 
-  /* ---- pembaca: toleransi lambat (GAS bisa cold start), 1-2 percobaan ---- */
-  getMenu()           { return this.call('getMenu', {}, { timeout: 60000, retries: 1 }); },
-  getAll()            { return this.call('getAll', {}, { timeout: 60000, retries: 1 }); },
-  getCategories()     { return this.call('getCategories', {}, { timeout: 45000, retries: 1 }); },
-  getSettings()       { return this.call('getSettings', {}, { timeout: 45000, retries: 1 }); },
-  getSales(limit)     { return this.call('getSales', { limit: limit || 200 }, { timeout: 60000, retries: 1 }); },
+  /* Pembaca: fail cepat (GAS bisa cold start, biar retry di background) */
+  getMenu()           { return this.call('getMenu', {}, { timeout: 20000, retries: 0 }); },
+  getAll()            { return this.call('getAll', {}, { timeout: 20000, retries: 0 }); },
+  getCategories()     { return this.call('getCategories', {}, { timeout: 15000, retries: 0 }); },
+  getSettings()       { return this.call('getSettings', {}, { timeout: 15000, retries: 0 }); },
+  getSales(limit)     { return this.call('getSales', { limit: limit || 200 }, { timeout: 20000, retries: 0 }); },
 
-  /* ---- penulis: retry lebih agresif biar transaksi tidak hilang ---- */
-  saveMenu(item)      { return this.call('saveMenu', { item }, { timeout: 30000, retries: 2 }); },
-  deleteMenu(id)      { return this.call('deleteMenu', { id }, { timeout: 30000, retries: 2 }); },
-  saveCategory(cat)   { return this.call('saveCategory', { category: cat }, { timeout: 30000, retries: 2 }); },
-  deleteCategory(id)  { return this.call('deleteCategory', { id }, { timeout: 30000, retries: 2 }); },
-  saveSettings(settings) { return this.call('saveSettings', { settings }, { timeout: 30000, retries: 2 }); },
-  saveSale(sale)      { return this.call('saveSale', { sale }, { timeout: 30000, retries: 2 }); },
-  setup(reset)        { return this.call('setup', { reset: reset === true }, { timeout: 120000, retries: 1 }); },
+  /* Penulis: retry singkat biar transaksi tidak hilang, tetap cepat */
+  saveMenu(item)      { return this.call('saveMenu', { item }, { timeout: 20000, retries: 1 }); },
+  deleteMenu(id)      { return this.call('deleteMenu', { id }, { timeout: 20000, retries: 1 }); },
+  saveCategory(cat)   { return this.call('saveCategory', { category: cat }, { timeout: 20000, retries: 1 }); },
+  deleteCategory(id)  { return this.call('deleteCategory', { id }, { timeout: 20000, retries: 1 }); },
+  saveSettings(settings) { return this.call('saveSettings', { settings }, { timeout: 20000, retries: 1 }); },
+  saveSale(sale)      { return this.call('saveSale', { sale }, { timeout: 20000, retries: 1 }); },
+  setup(reset)        { return this.call('setup', { reset: reset === true }, { timeout: 60000, retries: 0 }); },
 };
