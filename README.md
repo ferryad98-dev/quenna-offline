@@ -24,6 +24,9 @@ Aplikasi kasir berbasis **mobile web (PWA)** untuk usaha jualan online **PISANG 
 
 > 🔄 **Sinkron 2 arah**: edit langsung di spreadsheet (menu/kategori/transaksi/data toko) akan tampil di aplikasi dalam ±30 detik (auto-sync), atau langsung dengan tombol **📥 Muat Ulang Data** di Pengaturan → Data.
 
+
+> 🔧 **Fix nomor transaksi (v1.6.3)**: Google Sheets mengubah kolom TANGGAL menjadi format Date, sehingga perbandingan `String(...) === tanggal` gagal dan **semua transaksi bernomor 001**. Sudah diperbaiki: tanggal dinormalisasi sebelum dihitung + kolom TANGGAL/JAM diformat teks. Transaksi baru akan bernomor berurutan per hari (001, 002, 003…) dan reset tiap hari. **WAJIB redeploy Code.gs.**
+
 ## Arsitektur
 
 ```

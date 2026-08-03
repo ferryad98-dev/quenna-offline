@@ -338,9 +338,18 @@ function saveSale_(ss, sale) {
   const jam = String(sale.jam || Utilities.formatDate(new Date(), tz, 'HH:mm'));
 
   // Nomor urut transaksi PER HARI (reset tiap hari): 001, 002, dst.
+  // Google Sheets mengubah string tanggal menjadi Date → normalisasi
+  // dulu agar perbandingan selalu cocok (kalau tidak, semua jadi 001).
+  const fmtTgl = v => (v instanceof Date)
+    ? Utilities.formatDate(v, tz, 'yyyy-MM-dd')
+    : String(v || '').slice(0, 10);
   const dataRows = sh.getDataRange().getValues().slice(1);
-  const todayCount = dataRows.filter(r => String(r[1]) === tanggal).length;
+  const todayCount = dataRows.filter(r => fmtTgl(r[1]) === tanggal).length;
   const no = String(todayCount + 1).padStart(3, '0');
+
+  // Pastikan kolom TANGGAL & JAM berformat TEKS agar Sheets tidak
+  // mengubahnya menjadi Date (mencegah masalah di masa depan)
+  try { sh.getRange('B2:C').setNumberFormat('@'); } catch (e) {}
 
   sh.appendRow([
     no, tanggal, jam, JSON.stringify(items),
