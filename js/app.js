@@ -650,8 +650,17 @@ async function loadSales() {
 /* ===== FILTER RIWAYAT PER PERIODE ===== */
 const RANGE_LABELS = { today: 'Hari Ini', yesterday: 'Kemarin', '7d': '7 Hari Terakhir', month: 'Bulan Ini', all: 'Semua Waktu' };
 let historyRange = 'today';
+let historyDate = '';    // tanggal spesifik 'yyyy-mm-dd' (dari picker)
+let historyMonth = '';   // bulan spesifik 'yyyy-mm' (dari picker)
 
 function dateStr(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+
+/* Format label bulan Indonesia */
+function monthLabel(ym) {
+  const names = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  const [y, m] = String(ym).split('-');
+  return (names[Number(m) - 1] || m) + ' ' + y;
+}
 
 function inRange(tanggal, range) {
   const t = String(tanggal || '').slice(0, 10);
@@ -668,13 +677,17 @@ function inRange(tanggal, range) {
     return t >= dateStr(d) && t <= today;
   }
   if (range === 'month') return t.slice(0, 7) === today.slice(0, 7);
+  if (range === 'date') return historyDate ? t === historyDate : false;
+  if (range === 'monthpick') return historyMonth ? t.slice(0, 7) === historyMonth : false;
   return true; // all
 }
 
 function renderSales() {
   const list = State.sales.filter(s => inRange(s.tanggal, historyRange));
   const total = list.reduce((s, x) => s + (Number(x.total) || 0), 0);
-  const label = RANGE_LABELS[historyRange] || 'Hari Ini';
+  let label = RANGE_LABELS[historyRange] || 'Hari Ini';
+  if (historyRange === 'date' && historyDate) label = 'Tanggal ' + historyDate.split('-').reverse().join('-');
+  if (historyRange === 'monthpick' && historyMonth) label = 'Bulan ' + monthLabel(historyMonth);
 
   $('#statCount').textContent = String(list.length);
   $('#statOmset').textContent = fmtRp(total);
@@ -1255,6 +1268,40 @@ function bindEvents() {
 
   // Struk
   $('#btnPrint').addEventListener('click', doPrint);
+
+  // Riwayat: filter periode (chip cepat)
+  $('#historyFilter').addEventListener('click', e => {
+    const b = e.target.closest('.chip');
+    if (!b) return;
+    historyRange = b.dataset.range;
+    historyDate = '';
+    historyMonth = '';
+    const hd = $('#historyDate'); if (hd) hd.value = '';
+    const hm = $('#historyMonth'); if (hm) hm.value = '';
+    renderSales();
+  });
+
+  // Riwayat: pilih tanggal spesifik
+  $('#historyDate').addEventListener('change', e => {
+    const v = e.target.value; // 'yyyy-mm-dd'
+    if (!v) return;
+    historyDate = v;
+    historyMonth = '';
+    historyRange = 'date';
+    const hm = $('#historyMonth'); if (hm) hm.value = '';
+    renderSales();
+  });
+
+  // Riwayat: pilih bulan spesifik
+  $('#historyMonth').addEventListener('change', e => {
+    const v = e.target.value; // 'yyyy-mm'
+    if (!v) return;
+    historyMonth = v;
+    historyDate = '';
+    historyRange = 'monthpick';
+    const hd = $('#historyDate'); if (hd) hd.value = '';
+    renderSales();
+  });
 
   // Riwayat: lihat struk lama / cetak ulang
   $('#salesList').addEventListener('click', async e => {

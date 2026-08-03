@@ -75,6 +75,16 @@
         <button class="chip" data-range="month">Bulan Ini</button>
         <button class="chip" data-range="all">Semua</button>
       </div>
+      <div class="date-filters">
+        <label class="date-pick">
+          <span>📅 Pilih Tanggal</span>
+          <input type="date" id="historyDate">
+        </label>
+        <label class="date-pick">
+          <span>🗓 Pilih Bulan</span>
+          <input type="month" id="historyMonth">
+        </label>
+      </div>
       <div id="salesList" class="sales-list"><div class="empty">Memuat riwayat…</div></div>
     </section>
 
@@ -176,7 +186,7 @@
         <p class="hint">Transaksi belum tersimpan (server offline): <b id="pendingCount">0</b></p>
       </div>
 
-      <p class="version">KEDAI PISANG QUEENA v1.7.3 · PWA + Google Apps Script + Spreadsheet</p>
+      <p class="version">KEDAI PISANG QUEENA v1.7.4 · PWA + Google Apps Script + Spreadsheet</p>
     </section>
   </main>
 
